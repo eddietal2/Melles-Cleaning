@@ -1,19 +1,45 @@
 <script lang="ts">
-	import { PUBLIC_BUSINESS_PHONE, PUBLIC_WHATSAPP_NUMBER } from '$app/env/public';
+	import type { LayoutProps } from './$types';
+	import { jsonLdScript } from '$lib/utils/jsonld';
 
-	let { children } = $props();
+	let { data, children }: LayoutProps = $props();
 
 	const nav = [
 		{ href: '/', label: 'Home' },
 		{ href: '/services', label: 'Services' },
 		{ href: '/pricing', label: 'Pricing' },
 		{ href: '/gallery', label: 'Gallery' },
+		{ href: '/about', label: 'About' },
 		{ href: '/contact', label: 'Contact' }
 	];
 
-	const whatsappDigits = PUBLIC_WHATSAPP_NUMBER.replace(/[^0-9]/g, '');
-	const whatsappHref = whatsappDigits ? `https://wa.me/${whatsappDigits}` : null;
+	const settings = $derived(data.settings);
+	const whatsappDigits = $derived(settings.whatsapp.replace(/[^0-9]/g, ''));
+	const whatsappHref = $derived(whatsappDigits ? `https://wa.me/${whatsappDigits}` : null);
+
+	const localBusiness = $derived({
+		'@context': 'https://schema.org',
+		'@type': 'LocalBusiness',
+		name: settings.businessName,
+		description: 'Professional residential and commercial cleaning services in Dodoma, Tanzania.',
+		areaServed: settings.city,
+		address: {
+			'@type': 'PostalAddress',
+			addressLocality: settings.city,
+			addressCountry: 'TZ'
+		},
+		openingHours: settings.hours,
+		...(settings.phone ? { telephone: settings.phone } : {}),
+		...(settings.email ? { email: settings.email } : {})
+	});
+
+	const jsonLd = $derived(jsonLdScript(localBusiness));
 </script>
+
+<svelte:head>
+	<!-- eslint-disable-next-line svelte/no-at-html-tags -- JSON-LD is built from trusted, server-owned data -->
+	{@html jsonLd}
+</svelte:head>
 
 <div class="flex min-h-dvh flex-col">
 	<header class="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
@@ -23,7 +49,9 @@
 					class="grid h-9 w-9 place-items-center rounded-brand bg-brand-600 font-bold text-white"
 					aria-hidden="true">M</span
 				>
-				<span class="text-base font-semibold tracking-tight text-foreground">Melles Cleaning</span>
+				<span class="text-base font-semibold tracking-tight text-foreground"
+					>{settings.businessName}</span
+				>
 			</a>
 
 			<nav class="hidden items-center gap-6 md:flex" aria-label="Main">
@@ -47,7 +75,7 @@
 					>
 				{/if}
 				<a
-					href="/contact"
+					href="/book"
 					class="rounded-brand bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700"
 					>Get a quote</a
 				>
@@ -60,18 +88,19 @@
 	<footer class="border-t border-border bg-surface-inverse text-slate-300">
 		<div class="container-page grid gap-8 py-12 sm:grid-cols-2 lg:grid-cols-4">
 			<div>
-				<p class="text-base font-semibold text-white">Melles Cleaning Services</p>
+				<p class="text-base font-semibold text-white">{settings.businessName}</p>
 				<p class="mt-2 text-sm leading-relaxed">
-					Professional residential and commercial cleaning across Dodoma, Tanzania.
+					Professional residential and commercial cleaning across {settings.city},
+					{settings.country}.
 				</p>
 			</div>
 			<div>
 				<p class="text-sm font-semibold text-white">Services</p>
 				<ul class="mt-3 space-y-2 text-sm">
-					<li>Standard residential cleaning</li>
-					<li>Deep clean and move-in/move-out</li>
-					<li>Airbnb and guest house turnovers</li>
-					<li>Small office and commercial resets</li>
+					<li><a class="hover:text-white" href="/services">Standard residential</a></li>
+					<li><a class="hover:text-white" href="/services">Deep cleans</a></li>
+					<li><a class="hover:text-white" href="/services">Airbnb turnovers</a></li>
+					<li><a class="hover:text-white" href="/services">Office cleaning</a></li>
 				</ul>
 			</div>
 			<div>
@@ -79,18 +108,15 @@
 				<ul class="mt-3 space-y-2 text-sm">
 					<li><a class="hover:text-white" href="/pricing">Pricing</a></li>
 					<li><a class="hover:text-white" href="/gallery">Gallery</a></li>
+					<li><a class="hover:text-white" href="/about">About</a></li>
 					<li><a class="hover:text-white" href="/contact">Contact</a></li>
 				</ul>
 			</div>
 			<div>
 				<p class="text-sm font-semibold text-white">Get in touch</p>
 				<ul class="mt-3 space-y-2 text-sm">
-					{#if PUBLIC_BUSINESS_PHONE}
-						<li>
-							<a class="hover:text-white" href="tel:{PUBLIC_BUSINESS_PHONE}"
-								>{PUBLIC_BUSINESS_PHONE}</a
-							>
-						</li>
+					{#if settings.phone}
+						<li><a class="hover:text-white" href="tel:{settings.phone}">{settings.phone}</a></li>
 					{/if}
 					{#if whatsappHref}
 						<li>
@@ -102,13 +128,18 @@
 							>
 						</li>
 					{/if}
-					<li>Dodoma, Tanzania</li>
+					{#if settings.email}
+						<li><a class="hover:text-white" href="mailto:{settings.email}">{settings.email}</a></li>
+					{/if}
+					<li>{settings.address}</li>
+					<li>{settings.hours}</li>
 				</ul>
 			</div>
 		</div>
 		<div class="border-t border-white/10 py-5">
 			<p class="container-page text-xs text-slate-400">
-				© {new Date().getFullYear()} Melles Cleaning Services. All rights reserved.
+				© {new Date().getFullYear()}
+				{settings.businessName}. All rights reserved.
 			</p>
 		</div>
 	</footer>

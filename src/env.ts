@@ -13,6 +13,24 @@ export const variables = defineEnvVars({
 	/** PostgreSQL connection string used by Prisma. Required at startup. */
 	DATABASE_URL: {},
 
+	/** Session signing secret. */
+	AUTH_SECRET: {
+		schema: (value) => value ?? ''
+	},
+
+	/** Cloudflare R2 credentials for the media library. Optional in development. */
+	R2_ACCOUNT_ID: { schema: (value) => value ?? '' },
+	R2_ACCESS_KEY_ID: { schema: (value) => value ?? '' },
+	R2_SECRET_ACCESS_KEY: { schema: (value) => value ?? '' },
+	R2_BUCKET: { schema: (value) => value ?? 'melles-cleaning-media' },
+	R2_PUBLIC_URL: { schema: (value) => value ?? '' },
+
+	/** Resend credentials for transactional email. Optional until phase 2. */
+	RESEND_API_KEY: { schema: (value) => value ?? '' },
+	MAIL_FROM: {
+		schema: (value) => value ?? 'Melles Cleaning Services <noreply@example.com>'
+	},
+
 	/** Canonical public site URL, used for SEO and absolute links. */
 	PUBLIC_SITE_URL: {
 		public: true,

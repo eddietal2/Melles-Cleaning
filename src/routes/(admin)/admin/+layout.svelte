@@ -13,6 +13,7 @@
 		{ href: '/admin/staff', label: 'Staff' },
 		{ href: '/admin/checklists', label: 'Checklists' },
 		{ href: '/admin/content', label: 'Content' },
+		{ href: '/admin/media', label: 'Media' },
 		{ href: '/admin/settings', label: 'Settings' }
 	];
 

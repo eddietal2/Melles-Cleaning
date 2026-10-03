@@ -8,17 +8,17 @@ See [`docs/architecture.md`](docs/architecture.md) for the full system design.
 
 ## Stack
 
-| Concern | Choice |
-| --- | --- |
-| Framework | SvelteKit 3 + Svelte 5 (runes) |
-| Language | TypeScript (strict) |
-| Build | Vite 8, pnpm 10 |
-| Styling | Tailwind CSS v4 + typography + forms plugins |
-| Database | PostgreSQL (Neon) via Prisma 7 with the `@prisma/adapter-pg` driver adapter |
-| Auth | Custom session auth (bcrypt + httpOnly cookies) |
-| Media | Cloudflare R2 (planned, phase 1) |
-| Email | Resend (planned, phase 1) |
-| Deploy | Vercel |
+| Concern   | Choice                                                                      |
+| --------- | --------------------------------------------------------------------------- |
+| Framework | SvelteKit 3 + Svelte 5 (runes)                                              |
+| Language  | TypeScript (strict)                                                         |
+| Build     | Vite 8, pnpm 10                                                             |
+| Styling   | Tailwind CSS v4 + typography + forms plugins                                |
+| Database  | PostgreSQL (Neon) via Prisma 7 with the `@prisma/adapter-pg` driver adapter |
+| Auth      | Custom session auth (bcrypt + httpOnly cookies)                             |
+| Media     | Cloudflare R2 (planned, phase 1)                                            |
+| Email     | Resend (planned, phase 1)                                                   |
+| Deploy    | Vercel                                                                      |
 
 ## Prerequisites
 
@@ -55,20 +55,20 @@ pnpm dev --open
 
 ## Scripts
 
-| Script | Purpose |
-| --- | --- |
-| `pnpm dev` | Start the dev server |
-| `pnpm build` | Production build |
-| `pnpm preview` | Preview the production build |
-| `pnpm check` | SvelteKit sync + svelte-check |
-| `pnpm test` | Run unit tests once |
-| `pnpm lint` | Prettier check + ESLint |
-| `pnpm format` | Prettier write |
-| `pnpm db:migrate` | Create and apply a migration in development |
-| `pnpm db:deploy` | Apply migrations in production |
-| `pnpm db:seed` | Run the seed script |
-| `pnpm db:studio` | Open Prisma Studio |
-| `pnpm db:generate` | Regenerate the Prisma client |
+| Script             | Purpose                                     |
+| ------------------ | ------------------------------------------- |
+| `pnpm dev`         | Start the dev server                        |
+| `pnpm build`       | Production build                            |
+| `pnpm preview`     | Preview the production build                |
+| `pnpm check`       | SvelteKit sync + svelte-check               |
+| `pnpm test`        | Run unit tests once                         |
+| `pnpm lint`        | Prettier check + ESLint                     |
+| `pnpm format`      | Prettier write                              |
+| `pnpm db:migrate`  | Create and apply a migration in development |
+| `pnpm db:deploy`   | Apply migrations in production              |
+| `pnpm db:seed`     | Run the seed script                         |
+| `pnpm db:studio`   | Open Prisma Studio                          |
+| `pnpm db:generate` | Regenerate the Prisma client                |
 
 ## Project structure
 
@@ -121,9 +121,88 @@ prisma/
    migrations are applied.
 5. Deploy. `VERCEL` is set automatically, so the Vercel adapter is used.
 
+## Website and content management (phase 1)
+
+The public site is server-rendered and reads its content from PostgreSQL, so owner edits appear
+immediately without a rebuild.
+
+| Route                              | Purpose                                       |
+| ---------------------------------- | --------------------------------------------- |
+| `/`                                | Home with services, pricing and promotions    |
+| `/services` and `/services/[slug]` | Service catalogue and detail pages            |
+| `/pricing`                         | Full pricing catalogue grouped by service     |
+| `/gallery`                         | Published gallery images                      |
+| `/about`                           | Company story and the 20-point checklist      |
+| `/contact`                         | General enquiry form                          |
+| `/book`                            | Booking / quote request with a preferred date |
+| `/sitemap.xml`, `/robots.txt`      | SEO                                           |
+
+Both forms validate input with Zod, create a `Lead` record and notify the owner once a
+notification email is configured. The marketing layout also emits `LocalBusiness` JSON-LD.
+
+Owner editing lives under the admin area:
+
+| Area                          | What the owner can change                                                  |
+| ----------------------------- | -------------------------------------------------------------------------- |
+| `/admin/content/services`     | Create and edit services and their TZS pricing packages, show or hide them |
+| `/admin/content/faq`          | Add, edit, publish and delete FAQ entries                                  |
+| `/admin/content/testimonials` | Add, edit, publish and delete client reviews                               |
+| `/admin/media`                | Upload photos to R2 and curate the public gallery                          |
+| `/admin/settings`             | Contact details, business hours and promotion values                       |
+
+### Media library setup
+
+Uploads require a Cloudflare R2 bucket plus five environment variables. Here is where each value
+comes from in the Cloudflare dashboard.
+
+1. **Create the bucket** — R2 → *Create bucket*. Name it (for example `melles-cleaning-media`) and
+   put that name in `R2_BUCKET`.
+2. **`R2_ACCOUNT_ID`** — shown on the R2 overview page as *Account ID*. It is also the subdomain in
+   the S3 endpoint `https://<ACCOUNT_ID>.r2.cloudflarestorage.com`.
+3. **`R2_ACCESS_KEY_ID` and `R2_SECRET_ACCESS_KEY`** — these are **R2 S3 credentials**, not a
+   Cloudflare API token. Open R2 → *API* → *Manage API Tokens* (direct link:
+   `https://dash.cloudflare.com/?to=/:account/r2/api-tokens`) → *Create API token*. Give it *Object
+   Read & Write* and scope it to your bucket.
+
+   > **Common mistake:** the *Cloudflare API Tokens* page (My Profile → API Tokens, with templates
+   > such as "Read and write to Cloudflare Stream and Images") produces a **single** token string
+   > and cannot be used here. R2 credentials always come as **two** values — an Access Key ID and a
+   > Secret Access Key. The secret is displayed **only once** at creation; if you navigate away,
+   > delete that token and create a new one.
+4. **`R2_PUBLIC_URL`** — buckets are private by default, so a public base URL is needed for images
+   to render:
+   - *Quickest (development):* bucket → *Settings* → *Public access* → enable the **R2.dev
+     subdomain**. You get a URL like `https://pub-abc123.r2.dev`. It is rate limited and Cloudflare
+     intends it for non-production use.
+   - *Production:* bucket → *Settings* → *Public access* → *Custom Domains* → connect a domain such
+     as `media.example.com` and use that as `R2_PUBLIC_URL`.
+
+   Set it without a trailing slash and without the bucket name — the app builds
+   `R2_PUBLIC_URL/<object-key>`.
+
+**CORS is required for browser uploads.** Because the browser uploads directly to R2 using a
+presigned URL, the bucket must allow `PUT` from your origins. Add this under bucket → *Settings* →
+*CORS Policy*:
+
+```json
+[
+	{
+		"AllowedOrigins": ["http://localhost:5173", "https://your-production-domain"],
+		"AllowedMethods": ["PUT", "GET"],
+		"AllowedHeaders": ["Content-Type"],
+		"ExposeHeaders": ["ETag"],
+		"MaxAgeSeconds": 3600
+	}
+]
+```
+
+The browser requests a short-lived presigned PUT URL from `/api/media/upload` and uploads directly
+to R2, so image files never pass through the serverless function. Restart the dev server after
+editing `.env`, and add the same variables to your Vercel project for production.
+
 ## Roadmap
 
-Phase 0 (this milestone) delivered the design system, the full data model, authentication,
-role-guarded admin shell and CI. Phase 1 adds the CMS-backed marketing pages, R2 media library
-and lead capture; later phases add the CRM pipeline, scheduling, checklists, billing and
-localisation. See [`docs/architecture.md`](docs/architecture.md) section 18.
+Phase 0 delivered the design system, data model, authentication, admin shell and CI. Phase 1
+delivered the CMS-backed marketing site, lead capture, SEO and the owner content editors. Phase 2
+adds the CRM pipeline — leads, clients, bookings, calendar, staff and teams — followed by
+checklists, billing and localisation. See [`docs/architecture.md`](docs/architecture.md) section 18.

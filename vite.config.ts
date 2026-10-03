@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 import tailwindcss from '@tailwindcss/vite';
 import adapterVercel from '@sveltejs/adapter-vercel';
@@ -24,6 +25,13 @@ export default defineConfig({
 			adapter
 		})
 	],
+	resolve: {
+		alias: {
+			// SvelteKit 3 ships `paths: {}`, so we provide the familiar `$lib` alias
+			// ourselves for both TypeScript (tsconfig paths) and Vite.
+			$lib: fileURLToPath(new URL('./src/lib', import.meta.url))
+		}
+	},
 	test: {
 		expect: { requireAssertions: true },
 		environment: 'node',
