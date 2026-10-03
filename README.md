@@ -240,6 +240,25 @@ Run `pnpm i18n` after editing messages — `pnpm check` and `pnpm build` also co
 The aggregator webhook is at [`/api/webhooks/payments`](src/routes/api/webhooks/payments/+server.ts)
 and verifies an HMAC-SHA256 signature from `PAYMENTS_WEBHOOK_SECRET`.
 
+## Client portal (phase 5, optional)
+
+Recurring clients can sign in to follow their own cleans, invoices and feedback.
+
+| Route             | What the client sees                                          |
+| ----------------- | ------------------------------------------------------------ |
+| `/portal`         | Upcoming visits, outstanding balance, paid to date, feedback |
+| `/portal/bookings`| Every visit with status, service, schedule and total          |
+| `/portal/invoices`| Invoice line items, payments received and outstanding balance |
+| `/portal/feedback`| Leave a rating for a completed clean; review past feedback    |
+
+A portal login is a `User` with the `CLIENT` role whose email matches one of the client's contact
+emails ([`access.ts`](src/lib/server/portal/access.ts:1)). Every query is scoped by `clientId`
+([`data.ts`](src/lib/server/portal/data.ts:1)), so a client can only ever see their own records.
+Owners and admins can create a login from the client screen (which shows the generated password
+once) and preview any client with `/portal?client=<id>`. Client users are redirected to `/portal`
+after signing in. Access is enforced in [`hooks.server.ts`](src/hooks.server.ts:19) and the portal
+layout guard.
+
 ## Roadmap
 
 Phase 0 delivered the design system, data model, authentication, admin shell and CI. Phase 1
@@ -247,5 +266,5 @@ delivered the CMS-backed marketing site, lead capture, SEO and the owner content
 established the CRM core data — clients and bookings — and phase 3 completed operations and
 billing: quotes, invoices, payments, checklists, feedback and reports. Phase 4 added Swahili
 localisation, WhatsApp automation, mobile-money integration, referral/promo automation and
-analytics. Phase 5 is the optional client self-service portal. See
+analytics. Phase 5 added the optional client self-service portal. See
 [`docs/architecture.md`](docs/architecture.md) section 18.

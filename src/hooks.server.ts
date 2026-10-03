@@ -15,7 +15,7 @@ import { SESSION_COOKIE_NAME, validateSessionToken } from './lib/server/auth/ses
  * Route protection is centralized: anything under `/admin` requires a session, and
  * users are bounced to the login page with a `redirectTo` they return to after signing in.
  */
-const PROTECTED_PREFIX = '/admin';
+const PROTECTED_PREFIXES = ['/admin', '/portal'];
 
 function isKnownLocale(value: string | null): value is (typeof locales)[number] {
 	return value !== null && (locales as readonly string[]).includes(value);
@@ -51,7 +51,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 		event.locals.user = user;
 
 		const path = event.url.pathname;
-		const isProtected = path === PROTECTED_PREFIX || path.startsWith(`${PROTECTED_PREFIX}/`);
+		const isProtected = PROTECTED_PREFIXES.some(
+			(prefix) => path === prefix || path.startsWith(`${prefix}/`)
+		);
 
 		if (isProtected && !event.locals.user) {
 			const redirectTo = encodeURIComponent(`${path}${event.url.search}`);

@@ -15,7 +15,12 @@
 		clientStatusTone
 	} from '$lib/utils/status';
 
-	let { data }: PageProps = $props();
+	let { data, form }: PageProps = $props();
+
+	const message = $derived((form as { message?: string } | null)?.message);
+	const invite = $derived(
+		(form as { invite?: { email: string; password: string } } | null)?.invite
+	);
 </script>
 
 <div class="space-y-8">
@@ -168,6 +173,50 @@
 						Add contact
 					</button>
 				</form>
+			</div>
+
+			<div class="rounded-brand border border-border bg-background p-5 shadow-card">
+				<h2 class="text-sm font-semibold text-foreground">Client portal</h2>
+				{#if message}
+					<p class="mt-2 text-sm text-danger" role="alert">{message}</p>
+				{/if}
+
+				{#if invite}
+					<div class="mt-2 rounded-brand border border-success/30 bg-success/5 p-3 text-sm">
+						<p class="font-medium text-success">Invite created</p>
+						<p class="mt-1 text-foreground">Email: {invite.email}</p>
+						<p class="text-foreground">Temporary password: <code>{invite.password}</code></p>
+						<p class="mt-1 text-xs text-muted-foreground">
+							Share these once — the client should change the password after signing in.
+						</p>
+					</div>
+				{:else if data.portalUser}
+					<p class="mt-2 text-sm text-foreground">
+						Portal enabled for <span class="font-medium">{data.portalUser.email}</span>
+					</p>
+					<p class="text-xs text-muted-foreground">
+						{data.portalUser.lastLoginAt
+							? `Last signed in ${formatDateTime(data.portalUser.lastLoginAt)}`
+							: 'Has not signed in yet.'}
+					</p>
+					<a
+						href="/portal?client={data.client.id}"
+						class="mt-3 inline-block text-sm text-brand-700 hover:underline">Preview portal →</a
+					>
+				{:else}
+					<p class="mt-2 text-sm text-muted-foreground">
+						Create a login for the primary contact so they can follow bookings, invoices and
+						feedback.
+					</p>
+					<form method="POST" action="?/invitePortal" class="mt-3" use:enhance>
+						<button
+							type="submit"
+							class="rounded-brand border border-border px-3 py-2 text-sm font-medium text-foreground hover:border-brand-500 hover:text-brand-700"
+						>
+							Invite to portal
+						</button>
+					</form>
+				{/if}
 			</div>
 		</section>
 	</div>

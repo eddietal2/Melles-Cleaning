@@ -9,6 +9,7 @@ import {
 	getClient,
 	updateClient
 } from '$lib/server/crm/clients';
+import { findPortalUserForClient, inviteClientToPortal } from '$lib/server/portal/access';
 
 export const load: PageServerLoad = async ({ params }) => {
 	const client = await getClient(params.id);
@@ -17,7 +18,9 @@ export const load: PageServerLoad = async ({ params }) => {
 		throw error(404, 'Client not found.');
 	}
 
-	return { client };
+	const portalUser = await findPortalUserForClient(params.id);
+
+	return { client, portalUser };
 };
 
 export const actions: Actions = {
@@ -56,5 +59,15 @@ export const actions: Actions = {
 		const data = await request.formData();
 		await deleteClientContact(String(data.get('id') ?? ''));
 		return { success: true };
+	},
+
+	invitePortal: async ({ params, locals }) => {
+		const result = await inviteClientToPortal(params.id, locals.user?.id ?? null);
+
+		if ('error' in result) {
+			return fail(400, { message: result.error });
+		}
+
+		return { success: true, invite: result };
 	}
 };
