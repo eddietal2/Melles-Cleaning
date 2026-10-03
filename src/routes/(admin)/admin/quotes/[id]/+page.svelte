@@ -114,6 +114,25 @@
 			</div>
 
 			<div class="rounded-brand border border-border bg-background p-5 shadow-card">
+				<h2 class="text-sm font-semibold text-foreground">Promotions</h2>
+				<p class="mt-1 text-xs text-muted-foreground">
+					Amounts are recalculated server-side from the promotion settings.
+				</p>
+				<div class="mt-3 flex flex-wrap gap-2">
+					<form method="POST" action="?/applyFirstClean" use:enhance>
+						<button type="submit" class="rounded-brand border border-border px-3 py-1.5 text-xs font-medium text-foreground transition hover:border-brand-500 hover:text-brand-700">
+							Apply first-clean discount
+						</button>
+					</form>
+					<form method="POST" action="?/applyReferralCredit" use:enhance>
+						<button type="submit" class="rounded-brand border border-border px-3 py-1.5 text-xs font-medium text-foreground transition hover:border-brand-500 hover:text-brand-700">
+							Apply referral credit
+						</button>
+					</form>
+				</div>
+			</div>
+
+			<div class="rounded-brand border border-border bg-background p-5 shadow-card">
 				<h2 class="text-sm font-semibold text-foreground">Convert to booking</h2>
 				{#if data.quote.booking}
 					<p class="mt-2 text-sm text-muted-foreground">

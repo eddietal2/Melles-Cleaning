@@ -4,7 +4,16 @@ import { bookingSchema } from '$lib/schemas/booking';
 import { fieldErrors, formDataToObject } from '$lib/schemas/form';
 import { quoteSchema, readLineItems } from '$lib/schemas/quote';
 import { recordAudit } from '$lib/server/audit';
-import { convertQuoteToBooking, deleteQuote, getQuote, setQuoteStatus, updateQuote } from '$lib/server/crm/quotes';
+import { getSiteSettings } from '$lib/server/content/site';
+import {
+	convertQuoteToBooking,
+	deleteQuote,
+	getQuote,
+	setQuoteDiscount,
+	setQuoteStatus,
+	updateQuote
+} from '$lib/server/crm/quotes';
+import { firstCleanDiscountTzs } from '$lib/server/pricing/engine';
 import { db } from '$lib/server/db';
 import type { QuoteStatus } from '$lib/server/generated/prisma/enums';
 
@@ -59,6 +68,41 @@ export const actions: Actions = {
 		});
 
 		return { success: true };
+	},
+
+	applyFirstClean: async ({ params, locals }) => {
+		const quote = await getQuote(params.id);
+		if (!quote) return fail(404, { message: 'Quote not found.' });
+
+		const settings = await getSiteSettings();
+		const discountTzs = firstCleanDiscountTzs(quote.subtotalTzs, settings.firstCleanDiscountPercent);
+		await setQuoteDiscount(params.id, discountTzs);
+		await recordAudit({
+			userId: locals.user?.id,
+			action: 'promotion',
+			entityType: 'Quote',
+			entityId: params.id,
+			diff: { promotion: 'FIRST_CLEAN', percent: settings.firstCleanDiscountPercent }
+		});
+
+		return { success: true, message: `First-clean ${settings.firstCleanDiscountPercent}% discount applied.` };
+	},
+
+	applyReferralCredit: async ({ params, locals }) => {
+		const quote = await getQuote(params.id);
+		if (!quote) return fail(404, { message: 'Quote not found.' });
+
+		const settings = await getSiteSettings();
+		await setQuoteDiscount(params.id, quote.discountTzs + settings.referralCreditTzs);
+		await recordAudit({
+			userId: locals.user?.id,
+			action: 'promotion',
+			entityType: 'Quote',
+			entityId: params.id,
+			diff: { promotion: 'REFERRAL', creditTzs: settings.referralCreditTzs }
+		});
+
+		return { success: true, message: 'Referral credit applied.' };
 	},
 
 	convert: async ({ request, params, locals }) => {

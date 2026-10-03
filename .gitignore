@@ -24,3 +24,6 @@ vite.config.ts.timestamp-*
 
 # Prisma generated client
 /src/lib/server/generated
+
+# Paraglide generated i18n output
+/src/lib/paraglide

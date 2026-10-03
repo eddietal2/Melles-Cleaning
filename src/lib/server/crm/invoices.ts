@@ -159,6 +159,23 @@ export async function voidInvoice(id: string) {
 	await db.invoice.update({ where: { id }, data: { status: 'VOID' } });
 }
 
+/** Sets a flat discount and recalculates totals from the existing line items. */
+export async function setInvoiceDiscount(id: string, discountTzs: number) {
+	const invoice = await db.invoice.findUnique({ where: { id }, include: { lineItems: true } });
+	if (!invoice) return null;
+
+	const totals = computeTotals(invoice.lineItems, discountTzs);
+
+	return db.invoice.update({
+		where: { id },
+		data: {
+			subtotalTzs: totals.subtotalTzs,
+			discountTzs: totals.discountTzs,
+			totalTzs: totals.totalTzs
+		}
+	});
+}
+
 /**
  * Recomputes an invoice's status from its payments and syncs the linked booking,
  * so recording a payment is the only step needed to move a job to Paid.

@@ -59,3 +59,17 @@ export function parseTzsInput(value: FormDataEntryValue | null | undefined): num
 	if (digits === '') return 0;
 	return Number.parseInt(digits, 10);
 }
+
+/** The first-clean promotion: a percentage discount for a new client's first job. */
+export function firstCleanDiscountTzs(subtotalTzs: number, percent: number): number {
+	return discountFromPercent(subtotalTzs, percent);
+}
+
+/** Applies a referral credit to an amount, never dropping the total below zero. */
+export function applyCredit(
+	amountTzs: number,
+	creditTzs: number
+): { totalTzs: number; creditAppliedTzs: number } {
+	const credit = Math.min(Math.max(Math.round(creditTzs), 0), Math.max(Math.round(amountTzs), 0));
+	return { totalTzs: Math.max(amountTzs, 0) - credit, creditAppliedTzs: credit };
+}

@@ -10,7 +10,9 @@
 		invoiceStatusTone
 	} from '$lib/utils/status';
 
-	let { data }: PageProps = $props();
+	let { data, form }: PageProps = $props();
+
+	const message = $derived((form as { message?: string } | null)?.message);
 
 	const paid = $derived(data.invoice.payments.reduce((sum, payment) => sum + payment.amountTzs, 0));
 	const balance = $derived(Math.max(data.invoice.totalTzs - paid, 0));
@@ -32,6 +34,10 @@
 			{data.invoice.client.displayName} · due {formatDate(data.invoice.dueDate)}
 		</p>
 	</div>
+
+	{#if message}
+		<p class="rounded-brand border border-border bg-surface-muted px-3 py-2 text-sm text-foreground" role="status">{message}</p>
+	{/if}
 
 	<div class="grid gap-6 lg:grid-cols-3">
 		<section class="rounded-brand border border-border bg-background p-5 shadow-card lg:col-span-2">
@@ -116,6 +122,44 @@
 							</button>
 						</form>
 					{/if}
+				</div>
+			</div>
+
+			<div class="rounded-brand border border-border bg-background p-5 shadow-card">
+				<h2 class="text-sm font-semibold text-foreground">Promotions</h2>
+				<div class="mt-3 flex flex-wrap gap-2">
+					<form method="POST" action="?/applyFirstClean" use:enhance>
+						<button type="submit" class="rounded-brand border border-border px-3 py-1.5 text-xs font-medium text-foreground transition hover:border-brand-500 hover:text-brand-700">
+							Apply first-clean discount
+						</button>
+					</form>
+					<form method="POST" action="?/applyReferralCredit" use:enhance>
+						<button type="submit" class="rounded-brand border border-border px-3 py-1.5 text-xs font-medium text-foreground transition hover:border-brand-500 hover:text-brand-700">
+							Apply referral credit
+						</button>
+					</form>
+				</div>
+
+				<h2 class="mt-5 text-sm font-semibold text-foreground">Request mobile money</h2>
+				<form method="POST" action="?/requestMobileMoney" class="mt-2 flex flex-wrap gap-2" use:enhance>
+					<input name="phone" placeholder="07XX XXX XXX" class="min-w-40 flex-1 rounded-brand border-border text-sm shadow-sm focus:border-brand-600 focus:ring-brand-600" />
+					<button type="submit" class="rounded-brand border border-border px-3 py-2 text-xs font-medium text-foreground hover:border-brand-500 hover:text-brand-700">
+						Send request
+					</button>
+				</form>
+
+				<h2 class="mt-5 text-sm font-semibold text-foreground">Send to client</h2>
+				<div class="mt-2 flex flex-wrap gap-2">
+					<form method="POST" action="?/notifyIssued" use:enhance>
+						<button type="submit" class="rounded-brand border border-border px-3 py-1.5 text-xs font-medium text-foreground transition hover:border-brand-500 hover:text-brand-700">
+							Send invoice
+						</button>
+					</form>
+					<form method="POST" action="?/notifyReminder" use:enhance>
+						<button type="submit" class="rounded-brand border border-border px-3 py-1.5 text-xs font-medium text-foreground transition hover:border-brand-500 hover:text-brand-700">
+							Send reminder
+						</button>
+					</form>
 				</div>
 			</div>
 

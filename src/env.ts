@@ -47,5 +47,29 @@ export const variables = defineEnvVars({
 	PUBLIC_WHATSAPP_NUMBER: {
 		public: true,
 		schema: (value) => value ?? ''
-	}
+	},
+
+	/** Optional privacy-friendly analytics provider domain, e.g. "plausible.io". */
+	PUBLIC_ANALYTICS_DOMAIN: {
+		public: true,
+		schema: (value) => value ?? ''
+	},
+
+	/**
+	 * Phase 4 integrations. All are optional: when unset, the app degrades to
+	 * click-to-chat links and manual payment recording.
+	 */
+
+	/** WhatsApp Cloud API credentials for automated updates. */
+	WHATSAPP_CLOUD_TOKEN: { schema: (value) => value ?? '' },
+	WHATSAPP_PHONE_NUMBER_ID: { schema: (value) => value ?? '' },
+
+	/** SMS fallback gateway for clients without WhatsApp. */
+	SMS_API_KEY: { schema: (value) => value ?? '' },
+	SMS_SENDER_ID: { schema: (value) => value ?? 'MELLES' },
+
+	/** Mobile money aggregator (Selcom, ClickPesa, AzamPay). */
+	PAYMENTS_PROVIDER: { schema: (value) => value ?? 'selcom' },
+	PAYMENTS_API_KEY: { schema: (value) => value ?? '' },
+	PAYMENTS_WEBHOOK_SECRET: { schema: (value) => value ?? '' }
 });

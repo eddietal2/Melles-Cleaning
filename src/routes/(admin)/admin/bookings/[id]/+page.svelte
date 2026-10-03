@@ -92,6 +92,11 @@
 						</button>
 					</form>
 				{/if}
+				<form method="POST" action="?/sendConfirmation" use:enhance>
+					<button type="submit" class="rounded-brand border border-border px-3 py-1.5 text-xs font-medium text-foreground transition hover:border-brand-500 hover:text-brand-700">
+						Send confirmation
+					</button>
+				</form>
 			</div>
 		</section>
 

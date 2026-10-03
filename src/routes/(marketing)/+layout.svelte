@@ -1,16 +1,19 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import type { LayoutProps } from './$types';
+	import { locales } from '$lib/paraglide/runtime';
+	import * as m from '$lib/paraglide/messages.js';
 	import { jsonLdScript } from '$lib/utils/jsonld';
 
 	let { data, children }: LayoutProps = $props();
 
 	const nav = [
-		{ href: '/', label: 'Home' },
-		{ href: '/services', label: 'Services' },
-		{ href: '/pricing', label: 'Pricing' },
-		{ href: '/gallery', label: 'Gallery' },
-		{ href: '/about', label: 'About' },
-		{ href: '/contact', label: 'Contact' }
+		{ href: '/', label: m.nav_home },
+		{ href: '/services', label: m.nav_services },
+		{ href: '/pricing', label: m.nav_pricing },
+		{ href: '/gallery', label: m.nav_gallery },
+		{ href: '/about', label: m.nav_about },
+		{ href: '/contact', label: m.nav_contact }
 	];
 
 	const settings = $derived(data.settings);
@@ -39,6 +42,8 @@
 <svelte:head>
 	<!-- eslint-disable-next-line svelte/no-at-html-tags -- JSON-LD is built from trusted, server-owned data -->
 	{@html jsonLd}
+	<!-- eslint-disable-next-line svelte/no-at-html-tags -- static analytics snippet from a public env var -->
+	{@html data.analytics}
 </svelte:head>
 
 <div class="flex min-h-dvh flex-col">
@@ -54,30 +59,44 @@
 				>
 			</a>
 
-			<nav class="hidden items-center gap-6 md:flex" aria-label="Main">
+			<nav class="hidden items-center gap-6 md:flex" aria-label={m.nav_main()}>
 				{#each nav as item (item.href)}
 					<a
 						href={item.href}
 						class="text-sm font-medium text-muted-foreground transition hover:text-brand-700"
 					>
-						{item.label}
+						{item.label()}
 					</a>
 				{/each}
 			</nav>
 
-			<div class="flex items-center gap-2">
+			<div class="flex items-center gap-3">
+				<div class="hidden items-center gap-1 text-xs sm:flex" aria-label={m.language()}>
+					{#each locales as locale (locale)}
+						<a
+							href="{page.url.pathname}?lang={locale}"
+							class="rounded-pill px-2 py-0.5 font-medium transition {data.locale === locale
+								? 'bg-brand-50 text-brand-700'
+								: 'text-muted-foreground hover:text-foreground'}"
+							aria-current={data.locale === locale ? 'true' : undefined}
+						>
+							{locale.toUpperCase()}
+						</a>
+					{/each}
+				</div>
+
 				{#if whatsappHref}
 					<a
 						href={whatsappHref}
-						class="hidden rounded-brand border border-border px-3 py-2 text-sm font-medium text-foreground transition hover:border-brand-500 hover:text-brand-700 sm:inline-block"
+						class="hidden rounded-brand border border-border px-3 py-2 text-sm font-medium text-foreground transition hover:border-brand-500 hover:text-brand-700 lg:inline-block"
 						rel="noopener noreferrer"
-						target="_blank">WhatsApp</a
+						target="_blank">{m.cta_whatsapp()}</a
 					>
 				{/if}
 				<a
 					href="/book"
 					class="rounded-brand bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700"
-					>Get a quote</a
+					>{m.cta_quote()}</a
 				>
 			</div>
 		</div>
@@ -90,30 +109,29 @@
 			<div>
 				<p class="text-base font-semibold text-white">{settings.businessName}</p>
 				<p class="mt-2 text-sm leading-relaxed">
-					Professional residential and commercial cleaning across {settings.city},
-					{settings.country}.
+					{m.footer_tagline({ city: settings.city, country: settings.country })}
 				</p>
 			</div>
 			<div>
-				<p class="text-sm font-semibold text-white">Services</p>
+				<p class="text-sm font-semibold text-white">{m.footer_services()}</p>
 				<ul class="mt-3 space-y-2 text-sm">
-					<li><a class="hover:text-white" href="/services">Standard residential</a></li>
-					<li><a class="hover:text-white" href="/services">Deep cleans</a></li>
-					<li><a class="hover:text-white" href="/services">Airbnb turnovers</a></li>
-					<li><a class="hover:text-white" href="/services">Office cleaning</a></li>
+					<li><a class="hover:text-white" href="/services">{m.footer_service_residential()}</a></li>
+					<li><a class="hover:text-white" href="/services">{m.footer_service_deep()}</a></li>
+					<li><a class="hover:text-white" href="/services">{m.footer_service_airbnb()}</a></li>
+					<li><a class="hover:text-white" href="/services">{m.footer_service_office()}</a></li>
 				</ul>
 			</div>
 			<div>
-				<p class="text-sm font-semibold text-white">Company</p>
+				<p class="text-sm font-semibold text-white">{m.footer_company()}</p>
 				<ul class="mt-3 space-y-2 text-sm">
-					<li><a class="hover:text-white" href="/pricing">Pricing</a></li>
-					<li><a class="hover:text-white" href="/gallery">Gallery</a></li>
-					<li><a class="hover:text-white" href="/about">About</a></li>
-					<li><a class="hover:text-white" href="/contact">Contact</a></li>
+					<li><a class="hover:text-white" href="/pricing">{m.nav_pricing()}</a></li>
+					<li><a class="hover:text-white" href="/gallery">{m.nav_gallery()}</a></li>
+					<li><a class="hover:text-white" href="/about">{m.nav_about()}</a></li>
+					<li><a class="hover:text-white" href="/contact">{m.nav_contact()}</a></li>
 				</ul>
 			</div>
 			<div>
-				<p class="text-sm font-semibold text-white">Get in touch</p>
+				<p class="text-sm font-semibold text-white">{m.footer_get_in_touch()}</p>
 				<ul class="mt-3 space-y-2 text-sm">
 					{#if settings.phone}
 						<li><a class="hover:text-white" href="tel:{settings.phone}">{settings.phone}</a></li>
@@ -124,7 +142,7 @@
 								class="hover:text-white"
 								href={whatsappHref}
 								rel="noopener noreferrer"
-								target="_blank">WhatsApp us</a
+								target="_blank">{m.cta_whatsapp_us()}</a
 							>
 						</li>
 					{/if}
@@ -138,8 +156,10 @@
 		</div>
 		<div class="border-t border-white/10 py-5">
 			<p class="container-page text-xs text-slate-400">
-				© {new Date().getFullYear()}
-				{settings.businessName}. All rights reserved.
+				{m.footer_rights({
+					year: String(new Date().getFullYear()),
+					business: settings.businessName
+				})}
 			</p>
 		</div>
 	</footer>

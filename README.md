@@ -222,11 +222,30 @@ recomputes its invoice status — and the linked booking — automatically. Docu
 checklist on creation, and status changes are constrained by the lifecycle rules in
 [`src/lib/server/crm/bookings.ts`](src/lib/server/crm/bookings.ts).
 
+## Growth and localisation (phase 4)
+
+| Area             | What shipped                                                                                                 |
+| ---------------- | ------------------------------------------------------------------------------------------------------------ |
+| Bilingual EN/SW  | Paraglide JS with cookie + `Accept-Language` negotiation; switch with `?lang=en` / `?lang=sw`                |
+| WhatsApp         | Cloud API sender with a click-to-chat fallback — [`whatsapp.ts`](src/lib/server/notify/whatsapp.ts)          |
+| Email + SMS      | Resend transactional email and an optional SMS gateway — [`email.ts`](src/lib/server/notify/email.ts)        |
+| Mobile money     | Aggregator collections plus a signed webhook that records payments and reconciles invoices                   |
+| Promotions       | First-clean discount and referral credit applied server-side from settings                                   |
+| Analytics        | Privacy-friendly script injected only when `PUBLIC_ANALYTICS_DOMAIN` is set                                  |
+| Calendar         | ICS feed of upcoming jobs at `/api/calendar` (session or `?token=`)                                          |
+
+Message catalogs live in [`src/messages/en.json`](src/messages/en.json) and
+[`src/messages/sw.json`](src/messages/sw.json); Paraglide compiles them to `src/lib/paraglide`.
+Run `pnpm i18n` after editing messages — `pnpm check` and `pnpm build` also compile automatically.
+The aggregator webhook is at [`/api/webhooks/payments`](src/routes/api/webhooks/payments/+server.ts)
+and verifies an HMAC-SHA256 signature from `PAYMENTS_WEBHOOK_SECRET`.
+
 ## Roadmap
 
 Phase 0 delivered the design system, data model, authentication, admin shell and CI. Phase 1
 delivered the CMS-backed marketing site, lead capture, SEO and the owner content editors. Phase 2
 established the CRM core data — clients and bookings — and phase 3 completed operations and
-billing: quotes, invoices, payments, checklists, feedback and reports. Phase 4 adds Swahili
-localisation, WhatsApp automation and mobile-money integration; phase 5 the optional client
-portal. See [`docs/architecture.md`](docs/architecture.md) section 18.
+billing: quotes, invoices, payments, checklists, feedback and reports. Phase 4 added Swahili
+localisation, WhatsApp automation, mobile-money integration, referral/promo automation and
+analytics. Phase 5 is the optional client self-service portal. See
+[`docs/architecture.md`](docs/architecture.md) section 18.

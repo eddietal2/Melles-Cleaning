@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
+	applyCredit,
 	clampDiscount,
 	computeLineTotalTzs,
 	computeTotals,
 	discountFromPercent,
+	firstCleanDiscountTzs,
 	parseTzsInput,
 	totalPaid
 } from './engine';
@@ -69,5 +71,21 @@ describe('parseTzsInput', () => {
 	it('strips separators and currency noise', () => {
 		expect(parseTzsInput('TZS 40,000')).toBe(40000);
 		expect(parseTzsInput('')).toBe(0);
+	});
+});
+
+describe('firstCleanDiscountTzs', () => {
+	it('applies the configured first-clean percentage', () => {
+		expect(firstCleanDiscountTzs(120000, 20)).toBe(24000);
+	});
+});
+
+describe('applyCredit', () => {
+	it('applies a referral credit without going negative', () => {
+		expect(applyCredit(120000, 10000)).toEqual({ totalTzs: 110000, creditAppliedTzs: 10000 });
+	});
+
+	it('caps the credit at the amount owed', () => {
+		expect(applyCredit(5000, 10000)).toEqual({ totalTzs: 0, creditAppliedTzs: 5000 });
 	});
 });

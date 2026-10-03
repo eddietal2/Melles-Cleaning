@@ -3,6 +3,7 @@ import type { Actions, PageServerLoad } from './$types';
 import { recordAudit } from '$lib/server/audit';
 import { getBooking, nextBookingStatuses, updateBookingStatus } from '$lib/server/crm/bookings';
 import { createInvoiceFromBooking } from '$lib/server/crm/invoices';
+import { notifyBookingConfirmation, primaryContact } from '$lib/server/notify/notifications';
 import type { BookingStatus } from '$lib/server/generated/prisma/enums';
 
 export const load: PageServerLoad = async ({ params }) => {
@@ -34,6 +35,34 @@ export const actions: Actions = {
 		});
 
 		return { success: true };
+	},
+
+	sendConfirmation: async ({ params, locals }) => {
+		const booking = await getBooking(params.id);
+		if (!booking) return fail(404, { message: 'Booking not found.' });
+
+		const recipient = primaryContact(booking.client.contacts);
+		if (!recipient) {
+			return fail(400, { message: 'This client has no contact to notify.' });
+		}
+
+		const outcome = await notifyBookingConfirmation({
+			bookingNumber: booking.bookingNumber,
+			serviceName: booking.service.name,
+			scheduledStart: booking.scheduledStart,
+			address: booking.addressSnapshot,
+			recipient
+		});
+
+		await recordAudit({
+			userId: locals.user?.id,
+			action: 'notify',
+			entityType: 'Booking',
+			entityId: params.id,
+			diff: { email: outcome.email, whatsapp: outcome.whatsapp, sms: outcome.sms }
+		});
+
+		return { success: true, message: 'Confirmation sent to the client.' };
 	},
 
 	generateInvoice: async ({ params, locals }) => {

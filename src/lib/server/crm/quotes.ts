@@ -90,6 +90,23 @@ export async function deleteQuote(id: string) {
 	await db.quote.delete({ where: { id } });
 }
 
+/** Sets a flat discount and recalculates totals from the existing line items. */
+export async function setQuoteDiscount(id: string, discountTzs: number) {
+	const quote = await db.quote.findUnique({ where: { id }, include: { lineItems: true } });
+	if (!quote) return null;
+
+	const totals = computeTotals(quote.lineItems, discountTzs);
+
+	return db.quote.update({
+		where: { id },
+		data: {
+			subtotalTzs: totals.subtotalTzs,
+			discountTzs: totals.discountTzs,
+			totalTzs: totals.totalTzs
+		}
+	});
+}
+
 /**
  * Converts an accepted quote into a scheduled booking. The booking inherits the
  * quote total; the quote is marked accepted and linked for traceability.

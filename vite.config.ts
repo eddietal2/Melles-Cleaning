@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
+import { paraglideVitePlugin } from '@inlang/paraglide-js';
 import tailwindcss from '@tailwindcss/vite';
 import adapterVercel from '@sveltejs/adapter-vercel';
 import adapterAuto from '@sveltejs/adapter-auto';
@@ -16,6 +17,13 @@ const adapter = process.env.VERCEL ? adapterVercel() : adapterAuto();
 export default defineConfig({
 	plugins: [
 		tailwindcss(),
+		paraglideVitePlugin({
+			project: './project.inlang',
+			outdir: './src/lib/paraglide',
+			strategy: ['cookie', 'preferredLanguage', 'baseLocale'],
+			emitTsDeclarations: true,
+			isServer: 'import.meta.env.SSR'
+		}),
 		sveltekit({
 			compilerOptions: {
 				// Force runes mode for the project, except for libraries. Can be removed in svelte 6.
