@@ -5,13 +5,14 @@
 
 	const nav = [
 		{ href: '/admin', label: 'Dashboard' },
-		{ href: '/admin/leads', label: 'Leads' },
 		{ href: '/admin/clients', label: 'Clients' },
 		{ href: '/admin/bookings', label: 'Bookings' },
 		{ href: '/admin/quotes', label: 'Quotes' },
 		{ href: '/admin/invoices', label: 'Invoices' },
-		{ href: '/admin/staff', label: 'Staff' },
+		{ href: '/admin/payments', label: 'Payments' },
 		{ href: '/admin/checklists', label: 'Checklists' },
+		{ href: '/admin/feedback', label: 'Feedback' },
+		{ href: '/admin/reports', label: 'Reports' },
 		{ href: '/admin/content', label: 'Content' },
 		{ href: '/admin/media', label: 'Media' },
 		{ href: '/admin/settings', label: 'Settings' }

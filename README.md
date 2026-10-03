@@ -200,9 +200,33 @@ The browser requests a short-lived presigned PUT URL from `/api/media/upload` an
 to R2, so image files never pass through the serverless function. Restart the dev server after
 editing `.env`, and add the same variables to your Vercel project for production.
 
+## Operations and billing (phase 3)
+
+Phase 3 completes the job-to-cash cycle. New and completed admin routes:
+
+| Route                         | Purpose                                                                   |
+| ----------------------------- | ------------------------------------------------------------------------- |
+| `/admin/clients`              | Client profiles, contacts and service history                             |
+| `/admin/bookings`             | Schedule jobs, advance the job lifecycle, generate invoices               |
+| `/admin/quotes`               | Line-item quotes with server-side totals and quote-to-booking conversion  |
+| `/admin/invoices`             | Generate from a booking or build manually, issue, void, track balances    |
+| `/admin/payments`             | Record cash and mobile-money receipts                                     |
+| `/admin/checklists`           | QC templates and per-job completion with supervisor walkthrough sign-off  |
+| `/admin/feedback`             | Capture post-service ratings and publish approved reviews                 |
+| `/admin/reports`              | Revenue, retention, average job value, utilisation and invoice aging      |
+
+Totals are always recomputed server-side by the pricing engine in
+[`src/lib/server/pricing/engine.ts`](src/lib/server/pricing/engine.ts), and recording a payment
+recomputes its invoice status — and the linked booking — automatically. Document numbers
+(`QUO-`, `INV-`, `BKG-`) are sequential per EAT year. Every booking is issued the matching QC
+checklist on creation, and status changes are constrained by the lifecycle rules in
+[`src/lib/server/crm/bookings.ts`](src/lib/server/crm/bookings.ts).
+
 ## Roadmap
 
 Phase 0 delivered the design system, data model, authentication, admin shell and CI. Phase 1
 delivered the CMS-backed marketing site, lead capture, SEO and the owner content editors. Phase 2
-adds the CRM pipeline — leads, clients, bookings, calendar, staff and teams — followed by
-checklists, billing and localisation. See [`docs/architecture.md`](docs/architecture.md) section 18.
+established the CRM core data — clients and bookings — and phase 3 completed operations and
+billing: quotes, invoices, payments, checklists, feedback and reports. Phase 4 adds Swahili
+localisation, WhatsApp automation and mobile-money integration; phase 5 the optional client
+portal. See [`docs/architecture.md`](docs/architecture.md) section 18.
