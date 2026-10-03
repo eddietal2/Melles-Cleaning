@@ -33,8 +33,8 @@
 	<meta name="robots" content="noindex" />
 </svelte:head>
 
-<div class="flex min-h-dvh bg-surface">
-	<aside class="hidden w-60 shrink-0 flex-col border-r border-border bg-background lg:flex">
+<div class="flex h-dvh overflow-hidden bg-surface">
+	<aside class="hidden h-full w-60 shrink-0 flex-col border-r border-border bg-background lg:flex">
 		<div class="flex h-16 items-center gap-2 border-b border-border px-5">
 			<span
 				class="grid h-8 w-8 place-items-center rounded-brand bg-brand-600 text-sm font-bold text-white"
@@ -43,7 +43,7 @@
 			<span class="text-sm font-semibold text-foreground">Melles CRM</span>
 		</div>
 
-		<nav class="flex-1 space-y-1 p-3" aria-label="Admin">
+		<nav class="flex-1 space-y-1 overflow-y-auto p-3" aria-label="Admin">
 			{#each nav as item (item.href)}
 				<a
 					href={item.href}
@@ -63,9 +63,9 @@
 		</div>
 	</aside>
 
-	<div class="flex min-w-0 flex-1 flex-col">
+	<div class="flex min-w-0 flex-1 flex-col overflow-hidden">
 		<header
-			class="flex h-16 items-center justify-between gap-4 border-b border-border bg-background px-5"
+			class="flex h-16 shrink-0 items-center justify-between gap-4 border-b border-border bg-background px-5"
 		>
 			<p class="text-sm font-semibold text-foreground lg:hidden">Melles CRM</p>
 			<div class="ml-auto flex items-center gap-3">
@@ -88,7 +88,7 @@
 			</div>
 		</header>
 
-		<main class="flex-1 p-5 lg:p-8">
+		<main class="flex-1 overflow-y-auto p-5 lg:p-8">
 			{@render children()}
 		</main>
 	</div>
