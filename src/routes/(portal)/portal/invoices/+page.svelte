@@ -33,7 +33,9 @@
 							</span>
 						</div>
 						<p class="mt-1 text-xs text-muted-foreground">
-							Issued {formatDate(invoice.issuedAt ?? invoice.createdAt)} · due {formatDate(invoice.dueDate)}
+							Issued {formatDate(invoice.issuedAt ?? invoice.createdAt)} · due {formatDate(
+								invoice.dueDate
+							)}
 							{#if invoice.booking}· {invoice.booking.bookingNumber}{/if}
 						</p>
 					</div>
@@ -69,7 +71,9 @@
 				{/if}
 			</article>
 		{:else}
-			<p class="rounded-brand border border-border bg-background p-6 text-sm text-muted-foreground shadow-card">
+			<p
+				class="rounded-brand border border-border bg-background p-6 text-sm text-muted-foreground shadow-card"
+			>
 				You have no invoices yet.
 			</p>
 		{/each}

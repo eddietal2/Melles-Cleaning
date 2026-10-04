@@ -53,12 +53,16 @@
 				event cleanup.
 			</p>
 		</div>
-		<a href="/services" class="text-sm font-medium text-brand-700 hover:underline">View all services →</a>
+		<a href="/services" class="text-sm font-medium text-brand-700 hover:underline"
+			>View all services →</a
+		>
 	</div>
 
 	<div class="mt-8 grid gap-6 lg:grid-cols-2">
 		{#each data.services as service (service.id)}
-			<article class="flex flex-col rounded-brand border border-border bg-background p-6 shadow-card">
+			<article
+				class="flex flex-col rounded-brand border border-border bg-background p-6 shadow-card"
+			>
 				<h3 class="text-lg font-semibold text-foreground">{service.name}</h3>
 				{#if service.shortDescription}
 					<p class="mt-2 text-sm leading-relaxed text-muted-foreground">
@@ -94,7 +98,9 @@
 				>
 			</article>
 		{:else}
-			<p class="rounded-brand border border-border bg-surface-muted p-6 text-sm text-muted-foreground">
+			<p
+				class="rounded-brand border border-border bg-surface-muted p-6 text-sm text-muted-foreground"
+			>
 				Our service catalogue is being updated. <a class="text-brand-700 underline" href="/contact"
 					>Ask us for a quote</a
 				>.
@@ -108,7 +114,9 @@
 <section class="border-y border-border bg-surface">
 	<div class="container-page py-16 lg:py-20">
 		<div class="rounded-brand bg-brand-700 px-8 py-12 text-center text-white sm:px-12 sm:py-16">
-			<h2 class="text-2xl font-semibold tracking-tight sm:text-3xl">First office clean at 20% off</h2>
+			<h2 class="text-2xl font-semibold tracking-tight sm:text-3xl">
+				First office clean at 20% off
+			</h2>
 			<p class="mx-auto mt-3 max-w-2xl text-brand-50">
 				Newly opening offices get a discounted first clean. Refer a recurring client and receive
 				10,000&nbsp;TZS off your next service.

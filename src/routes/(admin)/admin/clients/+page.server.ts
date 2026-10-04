@@ -47,7 +47,12 @@ export const actions: Actions = {
 		const id = String(data.get('id') ?? '');
 
 		await deleteClient(id);
-		await recordAudit({ userId: locals.user?.id, action: 'delete', entityType: 'Client', entityId: id });
+		await recordAudit({
+			userId: locals.user?.id,
+			action: 'delete',
+			entityType: 'Client',
+			entityId: id
+		});
 
 		return { success: true };
 	}

@@ -70,7 +70,9 @@ export function toDateInputValue(value: Date | string | null | undefined): strin
 /** The current calendar year in EAT, used for document numbering roll-over. */
 export function currentEatYear(): number {
 	return Number(
-		new Intl.DateTimeFormat('en-GB', { timeZone: EAT_TIME_ZONE, year: 'numeric' }).format(new Date())
+		new Intl.DateTimeFormat('en-GB', { timeZone: EAT_TIME_ZONE, year: 'numeric' }).format(
+			new Date()
+		)
 	);
 }
 

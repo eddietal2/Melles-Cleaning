@@ -45,11 +45,7 @@ export const actions: Actions = {
 			return fail(400, { accountErrors: fieldErrors(parsed.error) });
 		}
 
-		const result = await updateAccount(
-			locals.user.id,
-			locals.session?.id ?? null,
-			parsed.data
-		);
+		const result = await updateAccount(locals.user.id, locals.session?.id ?? null, parsed.data);
 
 		if ('error' in result) {
 			return fail(400, {

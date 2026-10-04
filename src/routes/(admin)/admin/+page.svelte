@@ -40,25 +40,40 @@
 		</div>
 	{:then metrics}
 		<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-			<a href="/admin/quotes" class="rounded-brand border border-border bg-background p-5 shadow-card transition hover:border-brand-500">
+			<a
+				href="/admin/quotes"
+				class="rounded-brand border border-border bg-background p-5 shadow-card transition hover:border-brand-500"
+			>
 				<p class="text-xs tracking-wide text-muted-foreground uppercase">Pipeline value</p>
-				<p class="mt-2 text-2xl font-semibold text-foreground">{formatTzs(metrics.pipelineValueTzs)}</p>
+				<p class="mt-2 text-2xl font-semibold text-foreground">
+					{formatTzs(metrics.pipelineValueTzs)}
+				</p>
 				<p class="mt-1 text-xs text-muted-foreground">Open quotes and drafts</p>
 			</a>
-			<a href="/admin/bookings" class="rounded-brand border border-border bg-background p-5 shadow-card transition hover:border-brand-500">
+			<a
+				href="/admin/bookings"
+				class="rounded-brand border border-border bg-background p-5 shadow-card transition hover:border-brand-500"
+			>
 				<p class="text-xs tracking-wide text-muted-foreground uppercase">Jobs this week</p>
 				<p class="mt-2 text-2xl font-semibold text-foreground">{metrics.jobsThisWeek}</p>
 				<p class="mt-1 text-xs text-muted-foreground">Scheduled in the next 7 days</p>
 			</a>
 			<div class="rounded-brand border border-border bg-background p-5 shadow-card">
 				<p class="text-xs tracking-wide text-muted-foreground uppercase">Revenue this month</p>
-				<p class="mt-2 text-2xl font-semibold text-foreground">{formatTzs(metrics.monthlyRevenueTzs)}</p>
+				<p class="mt-2 text-2xl font-semibold text-foreground">
+					{formatTzs(metrics.monthlyRevenueTzs)}
+				</p>
 				<p class="mt-1 text-xs text-muted-foreground">Payments recorded in TZS</p>
 			</div>
-			<a href="/admin/invoices" class="rounded-brand border border-border bg-background p-5 shadow-card transition hover:border-brand-500">
+			<a
+				href="/admin/invoices"
+				class="rounded-brand border border-border bg-background p-5 shadow-card transition hover:border-brand-500"
+			>
 				<p class="text-xs tracking-wide text-muted-foreground uppercase">Unpaid invoices</p>
 				<p class="mt-2 text-2xl font-semibold text-foreground">{metrics.unpaidInvoiceCount}</p>
-				<p class="mt-1 text-xs text-muted-foreground">{formatTzs(metrics.unpaidInvoiceTzs)} outstanding</p>
+				<p class="mt-1 text-xs text-muted-foreground">
+					{formatTzs(metrics.unpaidInvoiceTzs)} outstanding
+				</p>
 			</a>
 		</div>
 
@@ -72,7 +87,10 @@
 					{#each metrics.upcomingBookings as booking (booking.id)}
 						<li class="flex items-center justify-between gap-3 py-2 text-sm">
 							<div>
-								<a href="/admin/bookings/{booking.id}" class="font-medium text-foreground hover:text-brand-700">
+								<a
+									href="/admin/bookings/{booking.id}"
+									class="font-medium text-foreground hover:text-brand-700"
+								>
 									{booking.client.displayName}
 								</a>
 								<p class="text-xs text-muted-foreground">
@@ -110,7 +128,10 @@
 			</section>
 		</div>
 	{:catch}
-		<p class="rounded-brand border border-danger/30 bg-danger/5 px-3 py-2 text-sm text-danger" role="alert">
+		<p
+			class="rounded-brand border border-danger/30 bg-danger/5 px-3 py-2 text-sm text-danger"
+			role="alert"
+		>
 			Could not load the dashboard. Please refresh the page.
 		</p>
 	{/await}

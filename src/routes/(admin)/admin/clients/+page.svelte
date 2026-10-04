@@ -106,7 +106,9 @@
 	{:then clients}
 		<div class="overflow-hidden rounded-brand border border-border bg-background shadow-card">
 			<table class="min-w-full divide-y divide-border text-sm">
-				<thead class="bg-surface-muted text-left text-xs tracking-wide text-muted-foreground uppercase">
+				<thead
+					class="bg-surface-muted text-left text-xs tracking-wide text-muted-foreground uppercase"
+				>
 					<tr>
 						<th class="px-5 py-3 font-medium">Client</th>
 						<th class="px-5 py-3 font-medium">Status</th>
@@ -141,7 +143,8 @@
 										type="submit"
 										class="text-xs text-muted-foreground transition hover:text-danger"
 										onclick={(event) => {
-											if (!confirm('Delete this client and all related records?')) event.preventDefault();
+											if (!confirm('Delete this client and all related records?'))
+												event.preventDefault();
 										}}
 									>
 										Delete
@@ -156,7 +159,10 @@
 			</table>
 		</div>
 	{:catch}
-		<p class="rounded-brand border border-danger/30 bg-danger/5 px-3 py-2 text-sm text-danger" role="alert">
+		<p
+			class="rounded-brand border border-danger/30 bg-danger/5 px-3 py-2 text-sm text-danger"
+			role="alert"
+		>
 			Could not load clients. Please refresh the page.
 		</p>
 	{/await}

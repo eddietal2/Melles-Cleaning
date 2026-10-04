@@ -105,8 +105,11 @@ prisma/
   `$app/env/private`, public ones from `$app/env/public`. The older `$env/*` modules are
   deprecated.
 - **`#lib/*` imports** resolve through `package.json#imports`, but only with an explicit file
-  extension (for example `#lib/assets/favicon.svg`). TypeScript-to-TypeScript imports inside
+  extension (for example `#lib/utils/currency.ts`). TypeScript-to-TypeScript imports inside
   `src/lib/server` use relative paths because extensionless `#lib` specifiers do not resolve.
+- **`$lib/*` imports** are aliased in both `tsconfig.json` and `vite.config.ts`; use this for
+  application code.
+- **Favicons live in `static/`**, not in `src/lib/assets/`.
 - **Streamed admin data.** The CRM dashboard, reports and list `load` functions return promises
   rather than awaiting them, so the page shell renders immediately and the content streams in
   behind a [`Skeleton`](src/lib/components/ui/skeleton.svelte) / [`TableSkeleton`](src/lib/components/ui/table-skeleton.svelte)
@@ -116,6 +119,30 @@ prisma/
   `process.env.VERCEL` is set, and `adapter-auto` otherwise. This is because the Vercel adapter
   writes symlinks, which fail on Windows inside a OneDrive folder (`EPERM`). Production builds on
   Vercel's Linux builders are unaffected; CI sets `VERCEL=1` to exercise the real adapter.
+
+## Favicon and app icons
+
+Icons live in `static/`, so they have stable URLs and can be swapped without touching code. The
+root layout references them:
+
+```html
+<link rel="icon" type="image/png" href="/favicon.png" />
+<link rel="apple-touch-icon" href="/favicon.png" />
+```
+
+To change the favicon:
+
+1. Drop your icon into `static/` — the current file is `static/favicon.png`. Keep it square (for
+   example 512×512) and use PNG, SVG or ICO.
+2. If you keep the same filename, nothing else needs to change. If you switch format or name,
+   update the `href` in [`src/routes/+layout.svelte`](src/routes/+layout.svelte), for example
+   `<link rel="icon" type="image/svg+xml" href="/favicon.svg" />`.
+3. Hard-refresh the browser or use a private window — favicons are cached aggressively. Adding
+   `static/favicon.ico` as well improves legacy support, since browsers request `/favicon.ico`
+   by default.
+
+> Avoid putting the favicon in `src/lib/assets/` and importing it. Vite inlines small SVGs as data
+> URLs, which works but makes the icon harder to cache and impossible to change without a rebuild.
 
 ## Deployment (Vercel + Neon)
 
@@ -159,34 +186,35 @@ Owner editing lives under the admin area:
 Uploads require a Cloudflare R2 bucket plus five environment variables. Here is where each value
 comes from in the Cloudflare dashboard.
 
-1. **Create the bucket** — R2 → *Create bucket*. Name it (for example `melles-cleaning-media`) and
+1. **Create the bucket** — R2 → _Create bucket_. Name it (for example `melles-cleaning-media`) and
    put that name in `R2_BUCKET`.
-2. **`R2_ACCOUNT_ID`** — shown on the R2 overview page as *Account ID*. It is also the subdomain in
+2. **`R2_ACCOUNT_ID`** — shown on the R2 overview page as _Account ID_. It is also the subdomain in
    the S3 endpoint `https://<ACCOUNT_ID>.r2.cloudflarestorage.com`.
 3. **`R2_ACCESS_KEY_ID` and `R2_SECRET_ACCESS_KEY`** — these are **R2 S3 credentials**, not a
-   Cloudflare API token. Open R2 → *API* → *Manage API Tokens* (direct link:
-   `https://dash.cloudflare.com/?to=/:account/r2/api-tokens`) → *Create API token*. Give it *Object
-   Read & Write* and scope it to your bucket.
+   Cloudflare API token. Open R2 → _API_ → _Manage API Tokens_ (direct link:
+   `https://dash.cloudflare.com/?to=/:account/r2/api-tokens`) → _Create API token_. Give it _Object
+   Read & Write_ and scope it to your bucket.
 
-   > **Common mistake:** the *Cloudflare API Tokens* page (My Profile → API Tokens, with templates
+   > **Common mistake:** the _Cloudflare API Tokens_ page (My Profile → API Tokens, with templates
    > such as "Read and write to Cloudflare Stream and Images") produces a **single** token string
    > and cannot be used here. R2 credentials always come as **two** values — an Access Key ID and a
    > Secret Access Key. The secret is displayed **only once** at creation; if you navigate away,
    > delete that token and create a new one.
+
 4. **`R2_PUBLIC_URL`** — buckets are private by default, so a public base URL is needed for images
    to render:
-   - *Quickest (development):* bucket → *Settings* → *Public access* → enable the **R2.dev
+   - _Quickest (development):_ bucket → _Settings_ → _Public access_ → enable the **R2.dev
      subdomain**. You get a URL like `https://pub-abc123.r2.dev`. It is rate limited and Cloudflare
      intends it for non-production use.
-   - *Production:* bucket → *Settings* → *Public access* → *Custom Domains* → connect a domain such
+   - _Production:_ bucket → _Settings_ → _Public access_ → _Custom Domains_ → connect a domain such
      as `media.example.com` and use that as `R2_PUBLIC_URL`.
 
    Set it without a trailing slash and without the bucket name — the app builds
    `R2_PUBLIC_URL/<object-key>`.
 
 **CORS is required for browser uploads.** Because the browser uploads directly to R2 using a
-presigned URL, the bucket must allow `PUT` from your origins. Add this under bucket → *Settings* →
-*CORS Policy*:
+presigned URL, the bucket must allow `PUT` from your origins. Add this under bucket → _Settings_ →
+_CORS Policy_:
 
 ```json
 [
@@ -208,16 +236,16 @@ editing `.env`, and add the same variables to your Vercel project for production
 
 Phase 3 completes the job-to-cash cycle. New and completed admin routes:
 
-| Route                         | Purpose                                                                   |
-| ----------------------------- | ------------------------------------------------------------------------- |
-| `/admin/clients`              | Client profiles, contacts and service history                             |
-| `/admin/bookings`             | Schedule jobs, advance the job lifecycle, generate invoices               |
-| `/admin/quotes`               | Line-item quotes with server-side totals and quote-to-booking conversion  |
-| `/admin/invoices`             | Generate from a booking or build manually, issue, void, track balances    |
-| `/admin/payments`             | Record cash and mobile-money receipts                                     |
-| `/admin/checklists`           | QC templates and per-job completion with supervisor walkthrough sign-off  |
-| `/admin/feedback`             | Capture post-service ratings and publish approved reviews                 |
-| `/admin/reports`              | Revenue, retention, average job value, utilisation and invoice aging      |
+| Route               | Purpose                                                                  |
+| ------------------- | ------------------------------------------------------------------------ |
+| `/admin/clients`    | Client profiles, contacts and service history                            |
+| `/admin/bookings`   | Schedule jobs, advance the job lifecycle, generate invoices              |
+| `/admin/quotes`     | Line-item quotes with server-side totals and quote-to-booking conversion |
+| `/admin/invoices`   | Generate from a booking or build manually, issue, void, track balances   |
+| `/admin/payments`   | Record cash and mobile-money receipts                                    |
+| `/admin/checklists` | QC templates and per-job completion with supervisor walkthrough sign-off |
+| `/admin/feedback`   | Capture post-service ratings and publish approved reviews                |
+| `/admin/reports`    | Revenue, retention, average job value, utilisation and invoice aging     |
 
 Totals are always recomputed server-side by the pricing engine in
 [`src/lib/server/pricing/engine.ts`](src/lib/server/pricing/engine.ts), and recording a payment
@@ -228,15 +256,15 @@ checklist on creation, and status changes are constrained by the lifecycle rules
 
 ## Growth and localisation (phase 4)
 
-| Area             | What shipped                                                                                                 |
-| ---------------- | ------------------------------------------------------------------------------------------------------------ |
-| Bilingual SW/EN  | Paraglide JS with Swahili as the default and an English switch, persisted in a cookie (`?lang=` fallback)          |
-| WhatsApp         | Cloud API sender with a click-to-chat fallback — [`whatsapp.ts`](src/lib/server/notify/whatsapp.ts)          |
-| Email + SMS      | Resend transactional email and an optional SMS gateway — [`email.ts`](src/lib/server/notify/email.ts)        |
-| Mobile money     | Aggregator collections plus a signed webhook that records payments and reconciles invoices                   |
-| Promotions       | First-clean discount and referral credit applied server-side from settings                                   |
-| Analytics        | Privacy-friendly script injected only when `PUBLIC_ANALYTICS_DOMAIN` is set                                  |
-| Calendar         | ICS feed of upcoming jobs at `/api/calendar` (session or `?token=`)                                          |
+| Area            | What shipped                                                                                              |
+| --------------- | --------------------------------------------------------------------------------------------------------- |
+| Bilingual SW/EN | Paraglide JS with Swahili as the default and an English switch, persisted in a cookie (`?lang=` fallback) |
+| WhatsApp        | Cloud API sender with a click-to-chat fallback — [`whatsapp.ts`](src/lib/server/notify/whatsapp.ts)       |
+| Email + SMS     | Resend transactional email and an optional SMS gateway — [`email.ts`](src/lib/server/notify/email.ts)     |
+| Mobile money    | Aggregator collections plus a signed webhook that records payments and reconciles invoices                |
+| Promotions      | First-clean discount and referral credit applied server-side from settings                                |
+| Analytics       | Privacy-friendly script injected only when `PUBLIC_ANALYTICS_DOMAIN` is set                               |
+| Calendar        | ICS feed of upcoming jobs at `/api/calendar` (session or `?token=`)                                       |
 
 Message catalogs live in [`src/messages/en.json`](src/messages/en.json) and
 [`src/messages/sw.json`](src/messages/sw.json); Paraglide compiles them to `src/lib/paraglide`.
@@ -248,12 +276,12 @@ and verifies an HMAC-SHA256 signature from `PAYMENTS_WEBHOOK_SECRET`.
 
 Recurring clients can sign in to follow their own cleans, invoices and feedback.
 
-| Route             | What the client sees                                          |
-| ----------------- | ------------------------------------------------------------ |
-| `/portal`         | Upcoming visits, outstanding balance, paid to date, feedback |
-| `/portal/bookings`| Every visit with status, service, schedule and total          |
-| `/portal/invoices`| Invoice line items, payments received and outstanding balance |
-| `/portal/feedback`| Leave a rating for a completed clean; review past feedback    |
+| Route              | What the client sees                                          |
+| ------------------ | ------------------------------------------------------------- |
+| `/portal`          | Upcoming visits, outstanding balance, paid to date, feedback  |
+| `/portal/bookings` | Every visit with status, service, schedule and total          |
+| `/portal/invoices` | Invoice line items, payments received and outstanding balance |
+| `/portal/feedback` | Leave a rating for a completed clean; review past feedback    |
 
 A portal login is a `User` with the `CLIENT` role whose email matches one of the client's contact
 emails ([`access.ts`](src/lib/server/portal/access.ts:1)). Every query is scoped by `clientId`

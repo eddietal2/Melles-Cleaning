@@ -20,7 +20,9 @@ export async function sendWhatsAppText(to: string, body: string): Promise<boolea
 	const recipient = to.replace(/[^0-9]/g, '');
 
 	if (!WHATSAPP_CLOUD_TOKEN || !WHATSAPP_PHONE_NUMBER_ID || !recipient) {
-		console.info(`[whatsapp] Cloud API not configured; message to ${recipient || 'unknown'} not sent`);
+		console.info(
+			`[whatsapp] Cloud API not configured; message to ${recipient || 'unknown'} not sent`
+		);
 		return false;
 	}
 

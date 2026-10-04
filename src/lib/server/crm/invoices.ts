@@ -16,7 +16,12 @@ interface StatusInput {
  * Single source of truth for invoice status. Manual DRAFT and VOID states are
  * preserved; everything else is derived from payments and the due date.
  */
-export function deriveInvoiceStatus({ status, totalTzs, paidTzs, dueDate }: StatusInput): InvoiceStatus {
+export function deriveInvoiceStatus({
+	status,
+	totalTzs,
+	paidTzs,
+	dueDate
+}: StatusInput): InvoiceStatus {
 	if (status === 'VOID') return 'VOID';
 	if (totalTzs > 0 && paidTzs >= totalTzs) return 'PAID';
 	if (paidTzs > 0) return 'PARTIAL';
@@ -75,14 +80,20 @@ export async function createInvoice(input: InvoiceInput, items: InvoiceLineItemI
 			subtotalTzs: totals.subtotalTzs,
 			discountTzs: totals.discountTzs,
 			totalTzs: totals.totalTzs,
-			dueDate: input.dueDate ? new Date(`${input.dueDate}T00:00:00+03:00`) : addDays(new Date(), 14),
+			dueDate: input.dueDate
+				? new Date(`${input.dueDate}T00:00:00+03:00`)
+				: addDays(new Date(), 14),
 			lineItems: { create: lineItemData(items) }
 		}
 	});
 }
 
 /** Replaces invoice line items and recalculates totals from the submitted form. */
-export async function updateInvoice(id: string, input: InvoiceInput, items: InvoiceLineItemInput[]) {
+export async function updateInvoice(
+	id: string,
+	input: InvoiceInput,
+	items: InvoiceLineItemInput[]
+) {
 	const totals = computeTotals(items, input.discountTzs);
 
 	return db.$transaction(async (tx) => {
@@ -216,6 +227,9 @@ export async function recomputeInvoiceStatus(invoiceId: string): Promise<Invoice
 }
 
 /** Outstanding balance on an invoice including its payments. */
-export function invoiceBalance(invoice: { totalTzs: number; payments: { amountTzs: number }[] }): number {
+export function invoiceBalance(invoice: {
+	totalTzs: number;
+	payments: { amountTzs: number }[];
+}): number {
 	return Math.max(invoice.totalTzs - totalPaid(invoice.payments), 0);
 }

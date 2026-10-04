@@ -95,7 +95,8 @@ export function verifyWebhookSignature(rawBody: string, signature: string | null
 	const providedBuffer = Buffer.from(signature);
 
 	return (
-		expectedBuffer.length === providedBuffer.length && timingSafeEqual(expectedBuffer, providedBuffer)
+		expectedBuffer.length === providedBuffer.length &&
+		timingSafeEqual(expectedBuffer, providedBuffer)
 	);
 }
 

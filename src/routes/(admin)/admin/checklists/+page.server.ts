@@ -1,6 +1,10 @@
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { ensureChecklistForBooking, listJobChecklists, listTemplates } from '$lib/server/crm/checklists';
+import {
+	ensureChecklistForBooking,
+	listJobChecklists,
+	listTemplates
+} from '$lib/server/crm/checklists';
 import { db } from '$lib/server/db';
 
 export const load: PageServerLoad = () => {

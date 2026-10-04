@@ -9,7 +9,9 @@
 <div class="space-y-8">
 	<div>
 		<h1 class="text-2xl font-semibold tracking-tight text-foreground">Welcome back</h1>
-		<p class="mt-1 text-sm text-muted-foreground">Your cleans, invoices and feedback in one place.</p>
+		<p class="mt-1 text-sm text-muted-foreground">
+			Your cleans, invoices and feedback in one place.
+		</p>
 	</div>
 
 	<div class="grid gap-4 sm:grid-cols-3">

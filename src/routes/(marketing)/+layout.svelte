@@ -90,120 +90,124 @@
 
 {#key data.locale}
 	<div class="flex min-h-dvh flex-col">
-	<header class="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
-		<div class="container-page flex h-16 items-center justify-between gap-4">
-			<a href="/" class="flex items-center gap-2">
-				<span
-					class="grid h-9 w-9 place-items-center rounded-brand bg-brand-600 font-bold text-white"
-					aria-hidden="true">M</span
-				>
-				<span class="text-base font-semibold tracking-tight text-foreground"
-					>{settings.businessName}</span
-				>
-			</a>
-
-			<nav class="hidden items-center gap-6 md:flex" aria-label={m.nav_main()}>
-				{#each nav as item (item.href)}
-					<a
-						href={item.href}
-						class="relative text-sm font-medium transition {isActive(item.href)
-							? 'text-brand-700 after:absolute after:inset-x-0 after:-bottom-1.5 after:h-0.5 after:rounded-pill after:bg-brand-600'
-							: 'text-muted-foreground hover:text-brand-700'}"
-						aria-current={isActive(item.href) ? 'page' : undefined}
+		<header class="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
+			<div class="container-page flex h-16 items-center justify-between gap-4">
+				<a href="/" class="flex items-center gap-2">
+					<span
+						class="grid h-9 w-9 place-items-center rounded-brand bg-brand-600 font-bold text-white"
+						aria-hidden="true">M</span
 					>
-						{item.label()}
-					</a>
-				{/each}
-			</nav>
+					<span class="text-base font-semibold tracking-tight text-foreground"
+						>{settings.businessName}</span
+					>
+				</a>
 
-			<div class="flex items-center gap-3">
-				<div
-					class="hidden items-center rounded-pill border border-border bg-surface-muted p-0.5 text-xs sm:flex"
-					role="group"
-					aria-label={m.language()}
-				>
-					{#each locales as locale (locale)}
+				<nav class="hidden items-center gap-6 md:flex" aria-label={m.nav_main()}>
+					{#each nav as item (item.href)}
 						<a
-							href="{page.url.pathname}?lang={locale}"
-							onclick={(event) => switchLocale(event, locale)}
-							class="rounded-pill px-3 py-1 font-medium transition {activeLocale === locale
-								? 'bg-brand-600 text-white shadow-sm'
-								: 'text-muted-foreground hover:text-foreground'}"
-							aria-current={activeLocale === locale ? 'true' : undefined}
+							href={item.href}
+							class="relative text-sm font-medium transition {isActive(item.href)
+								? 'text-brand-700 after:absolute after:inset-x-0 after:-bottom-1.5 after:h-0.5 after:rounded-pill after:bg-brand-600'
+								: 'text-muted-foreground hover:text-brand-700'}"
+							aria-current={isActive(item.href) ? 'page' : undefined}
 						>
-							{localeLabels[locale]()}
+							{item.label()}
 						</a>
 					{/each}
-				</div>
+				</nav>
 
-				{#if whatsappHref}
-					<a
-						href={whatsappHref}
-						class="hidden rounded-brand border border-border px-3 py-2 text-sm font-medium text-foreground transition hover:border-brand-500 hover:text-brand-700 lg:inline-block"
-						rel="noopener noreferrer"
-						target="_blank">{m.cta_whatsapp()}</a
+				<div class="flex items-center gap-3">
+					<div
+						class="hidden items-center rounded-pill border border-border bg-surface-muted p-0.5 text-xs sm:flex"
+						role="group"
+						aria-label={m.language()}
 					>
-				{/if}
-				<a
-					href="/book"
-					class="rounded-brand bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700"
-					>{m.cta_quote()}</a
-				>
-			</div>
-		</div>
-	</header>
-
-	<main class="flex-1">{@render children()}</main>
-
-	<footer class="border-t border-border bg-surface-inverse text-slate-300">
-		<div class="container-page grid gap-8 py-12 sm:grid-cols-2 lg:grid-cols-4">
-			<div>
-				<p class="text-base font-semibold text-white">{settings.businessName}</p>
-				<p class="mt-2 text-sm leading-relaxed">
-					{m.footer_tagline({ city: settings.city, country: settings.country })}
-				</p>
-			</div>
-			<div>
-				<p class="text-sm font-semibold text-white">{m.footer_services()}</p>
-				<ul class="mt-3 space-y-2 text-sm">
-					<li><a class="hover:text-white" href="/services">{m.footer_service_residential()}</a></li>
-					<li><a class="hover:text-white" href="/services">{m.footer_service_deep()}</a></li>
-					<li><a class="hover:text-white" href="/services">{m.footer_service_airbnb()}</a></li>
-					<li><a class="hover:text-white" href="/services">{m.footer_service_office()}</a></li>
-				</ul>
-			</div>
-			<div>
-				<p class="text-sm font-semibold text-white">{m.footer_company()}</p>
-				<ul class="mt-3 space-y-2 text-sm">
-					<li><a class="hover:text-white" href="/gallery">{m.nav_gallery()}</a></li>
-					<li><a class="hover:text-white" href="/about">{m.nav_about()}</a></li>
-					<li><a class="hover:text-white" href="/contact">{m.nav_contact()}</a></li>
-				</ul>
-			</div>
-			<div>
-				<p class="text-sm font-semibold text-white">{m.footer_get_in_touch()}</p>
-				<ul class="mt-3 space-y-2 text-sm">
-					{#if settings.phone}
-						<li><a class="hover:text-white" href="tel:{settings.phone}">{settings.phone}</a></li>
-					{/if}
-					{#if whatsappHref}
-						<li>
+						{#each locales as locale (locale)}
 							<a
-								class="hover:text-white"
-								href={whatsappHref}
-								rel="noopener noreferrer"
-								target="_blank">{m.cta_whatsapp_us()}</a
+								href="{page.url.pathname}?lang={locale}"
+								onclick={(event) => switchLocale(event, locale)}
+								class="rounded-pill px-3 py-1 font-medium transition {activeLocale === locale
+									? 'bg-brand-600 text-white shadow-sm'
+									: 'text-muted-foreground hover:text-foreground'}"
+								aria-current={activeLocale === locale ? 'true' : undefined}
 							>
-						</li>
+								{localeLabels[locale]()}
+							</a>
+						{/each}
+					</div>
+
+					{#if whatsappHref}
+						<a
+							href={whatsappHref}
+							class="hidden rounded-brand border border-border px-3 py-2 text-sm font-medium text-foreground transition hover:border-brand-500 hover:text-brand-700 lg:inline-block"
+							rel="noopener noreferrer"
+							target="_blank">{m.cta_whatsapp()}</a
+						>
 					{/if}
-					{#if settings.email}
-						<li><a class="hover:text-white" href="mailto:{settings.email}">{settings.email}</a></li>
-					{/if}
-					<li>{settings.address}</li>
-					<li>{settings.hours}</li>
-				</ul>
+					<a
+						href="/book"
+						class="rounded-brand bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700"
+						>{m.cta_quote()}</a
+					>
+				</div>
 			</div>
-		</div>
+		</header>
+
+		<main class="flex-1">{@render children()}</main>
+
+		<footer class="border-t border-border bg-surface-inverse text-slate-300">
+			<div class="container-page grid gap-8 py-12 sm:grid-cols-2 lg:grid-cols-4">
+				<div>
+					<p class="text-base font-semibold text-white">{settings.businessName}</p>
+					<p class="mt-2 text-sm leading-relaxed">
+						{m.footer_tagline({ city: settings.city, country: settings.country })}
+					</p>
+				</div>
+				<div>
+					<p class="text-sm font-semibold text-white">{m.footer_services()}</p>
+					<ul class="mt-3 space-y-2 text-sm">
+						<li>
+							<a class="hover:text-white" href="/services">{m.footer_service_residential()}</a>
+						</li>
+						<li><a class="hover:text-white" href="/services">{m.footer_service_deep()}</a></li>
+						<li><a class="hover:text-white" href="/services">{m.footer_service_airbnb()}</a></li>
+						<li><a class="hover:text-white" href="/services">{m.footer_service_office()}</a></li>
+					</ul>
+				</div>
+				<div>
+					<p class="text-sm font-semibold text-white">{m.footer_company()}</p>
+					<ul class="mt-3 space-y-2 text-sm">
+						<li><a class="hover:text-white" href="/gallery">{m.nav_gallery()}</a></li>
+						<li><a class="hover:text-white" href="/about">{m.nav_about()}</a></li>
+						<li><a class="hover:text-white" href="/contact">{m.nav_contact()}</a></li>
+					</ul>
+				</div>
+				<div>
+					<p class="text-sm font-semibold text-white">{m.footer_get_in_touch()}</p>
+					<ul class="mt-3 space-y-2 text-sm">
+						{#if settings.phone}
+							<li><a class="hover:text-white" href="tel:{settings.phone}">{settings.phone}</a></li>
+						{/if}
+						{#if whatsappHref}
+							<li>
+								<a
+									class="hover:text-white"
+									href={whatsappHref}
+									rel="noopener noreferrer"
+									target="_blank">{m.cta_whatsapp_us()}</a
+								>
+							</li>
+						{/if}
+						{#if settings.email}
+							<li>
+								<a class="hover:text-white" href="mailto:{settings.email}">{settings.email}</a>
+							</li>
+						{/if}
+						<li>{settings.address}</li>
+						<li>{settings.hours}</li>
+					</ul>
+				</div>
+			</div>
 			<div class="border-t border-white/10 py-5">
 				<p class="container-page text-xs text-slate-400">
 					{m.footer_rights({

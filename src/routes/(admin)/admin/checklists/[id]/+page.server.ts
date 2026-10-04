@@ -1,7 +1,11 @@
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { recordAudit } from '$lib/server/audit';
-import { getJobChecklist, saveChecklistResults, signOffChecklist } from '$lib/server/crm/checklists';
+import {
+	getJobChecklist,
+	saveChecklistResults,
+	signOffChecklist
+} from '$lib/server/crm/checklists';
 
 export const load: PageServerLoad = async ({ params }) => {
 	const checklist = await getJobChecklist(params.id);

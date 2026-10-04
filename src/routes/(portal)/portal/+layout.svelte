@@ -27,7 +27,8 @@
 				<span class="text-base font-semibold text-foreground">Client portal</span>
 			</a>
 			<div class="flex items-center gap-3">
-				<span class="hidden text-sm text-muted-foreground sm:inline">{data.client.displayName}</span>
+				<span class="hidden text-sm text-muted-foreground sm:inline">{data.client.displayName}</span
+				>
 				<form method="POST" action="/logout">
 					<button
 						type="submit"
@@ -39,7 +40,9 @@
 			</div>
 		</div>
 		{#if data.isPreview}
-			<div class="border-t border-accent-200 bg-accent-50 px-4 py-2 text-center text-xs text-accent-900">
+			<div
+				class="border-t border-accent-200 bg-accent-50 px-4 py-2 text-center text-xs text-accent-900"
+			>
 				Previewing as {data.client.displayName}.
 				<a class="underline" href="/admin/clients/{data.client.id}">Open in CRM</a>
 			</div>

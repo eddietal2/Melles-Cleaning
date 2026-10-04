@@ -52,7 +52,9 @@
 		<div class="grid gap-4 sm:grid-cols-3">
 			<div class="rounded-brand border border-border bg-background p-5 shadow-card">
 				<p class="text-xs tracking-wide text-muted-foreground uppercase">Average job value</p>
-				<p class="mt-2 text-2xl font-semibold text-foreground">{formatTzs(reports.averageJobValueTzs)}</p>
+				<p class="mt-2 text-2xl font-semibold text-foreground">
+					{formatTzs(reports.averageJobValueTzs)}
+				</p>
 			</div>
 			<div class="rounded-brand border border-border bg-background p-5 shadow-card">
 				<p class="text-xs tracking-wide text-muted-foreground uppercase">Client retention</p>
@@ -97,7 +99,7 @@
 			<section class="rounded-brand border border-border bg-background p-5 shadow-card">
 				<h2 class="text-sm font-semibold text-foreground">Invoiced by segment</h2>
 				<div class="mt-4 space-y-3">
-					{#each ([['RESIDENTIAL', 'Residential'], ['COMMERCIAL', 'Commercial']] as const) as [key, label] (key)}
+					{#each [['RESIDENTIAL', 'Residential'], ['COMMERCIAL', 'Commercial']] as const as [key, label] (key)}
 						{@const value = reports.segmentTotals[key]}
 						<div>
 							<div class="flex justify-between text-sm">
@@ -144,7 +146,9 @@
 				{#each reports.teamUtilisation as member (member.name)}
 					<li class="flex items-center justify-between">
 						<span class="text-foreground">{member.name}</span>
-						<span class="text-muted-foreground">{member.jobs} job{member.jobs === 1 ? '' : 's'}</span>
+						<span class="text-muted-foreground"
+							>{member.jobs} job{member.jobs === 1 ? '' : 's'}</span
+						>
 					</li>
 				{:else}
 					<li class="text-muted-foreground">No assignments recorded yet.</li>
@@ -152,7 +156,10 @@
 			</ul>
 		</section>
 	{:catch}
-		<p class="rounded-brand border border-danger/30 bg-danger/5 px-3 py-2 text-sm text-danger" role="alert">
+		<p
+			class="rounded-brand border border-danger/30 bg-danger/5 px-3 py-2 text-sm text-danger"
+			role="alert"
+		>
 			Could not load the reports. Please refresh the page.
 		</p>
 	{/await}

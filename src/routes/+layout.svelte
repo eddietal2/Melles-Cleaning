@@ -1,6 +1,5 @@
 <script lang="ts">
 	import './layout.css';
-	import favicon from '#lib/assets/favicon.svg';
 	import { navigating } from '$app/state';
 
 	let { children } = $props();
@@ -11,7 +10,8 @@
 </script>
 
 <svelte:head>
-	<link rel="icon" href={favicon} />
+	<link rel="icon" type="image/png" href="/favicon.png" />
+	<link rel="apple-touch-icon" href="/favicon.png" />
 </svelte:head>
 
 {#if busy}

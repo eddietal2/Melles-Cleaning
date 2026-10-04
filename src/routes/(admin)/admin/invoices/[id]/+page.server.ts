@@ -50,20 +50,35 @@ export const actions: Actions = {
 		}
 
 		await updateInvoice(params.id, parsed.data, readInvoiceLineItems(data));
-		await recordAudit({ userId: locals.user?.id, action: 'update', entityType: 'Invoice', entityId: params.id });
+		await recordAudit({
+			userId: locals.user?.id,
+			action: 'update',
+			entityType: 'Invoice',
+			entityId: params.id
+		});
 
 		return { success: true };
 	},
 
 	issue: async ({ params, locals }) => {
 		await issueInvoice(params.id);
-		await recordAudit({ userId: locals.user?.id, action: 'issue', entityType: 'Invoice', entityId: params.id });
+		await recordAudit({
+			userId: locals.user?.id,
+			action: 'issue',
+			entityType: 'Invoice',
+			entityId: params.id
+		});
 		return { success: true };
 	},
 
 	void: async ({ params, locals }) => {
 		await voidInvoice(params.id);
-		await recordAudit({ userId: locals.user?.id, action: 'void', entityType: 'Invoice', entityId: params.id });
+		await recordAudit({
+			userId: locals.user?.id,
+			action: 'void',
+			entityType: 'Invoice',
+			entityId: params.id
+		});
 		return { success: true };
 	},
 
@@ -84,7 +99,10 @@ export const actions: Actions = {
 			diff: { promotion: 'FIRST_CLEAN', percent: settings.firstCleanDiscountPercent }
 		});
 
-		return { success: true, message: `First-clean ${settings.firstCleanDiscountPercent}% discount applied.` };
+		return {
+			success: true,
+			message: `First-clean ${settings.firstCleanDiscountPercent}% discount applied.`
+		};
 	},
 
 	applyReferralCredit: async ({ params, locals }) => {
@@ -194,7 +212,12 @@ export const actions: Actions = {
 		const id = String(data.get('id') ?? '');
 
 		await deletePayment(id);
-		await recordAudit({ userId: locals.user?.id, action: 'delete', entityType: 'Payment', entityId: id });
+		await recordAudit({
+			userId: locals.user?.id,
+			action: 'delete',
+			entityType: 'Payment',
+			entityId: id
+		});
 
 		return { success: true };
 	}

@@ -51,7 +51,9 @@
 				</div>
 			</article>
 		{:else}
-			<p class="rounded-brand border border-border bg-background p-6 text-sm text-muted-foreground shadow-card">
+			<p
+				class="rounded-brand border border-border bg-background p-6 text-sm text-muted-foreground shadow-card"
+			>
 				No bookings yet. <a class="text-brand-700 hover:underline" href="/book">Request a clean</a>.
 			</p>
 		{/each}

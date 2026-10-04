@@ -82,7 +82,10 @@ export async function ensureChecklistForBooking(bookingId: string, templateId?: 
 }
 
 /** Persists ticked/unticked items and nudges the checklist into progress. */
-export async function saveChecklistResults(jobChecklistId: string, results: ChecklistResultInput[]) {
+export async function saveChecklistResults(
+	jobChecklistId: string,
+	results: ChecklistResultInput[]
+) {
 	await db.$transaction(
 		results.map((result) =>
 			db.checklistResult.update({

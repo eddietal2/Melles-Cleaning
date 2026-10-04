@@ -43,7 +43,10 @@ export async function getDashboardMetrics() {
 			include: { booking: { include: { client: true, service: true } } }
 		}),
 		db.booking.findMany({
-			where: { status: { notIn: ['CANCELLED', 'PAID'] }, scheduledStart: { gte: startOfEatDay(now) } },
+			where: {
+				status: { notIn: ['CANCELLED', 'PAID'] },
+				scheduledStart: { gte: startOfEatDay(now) }
+			},
 			orderBy: { scheduledStart: 'asc' },
 			take: 5,
 			include: { client: true, service: true }
@@ -87,7 +90,10 @@ export async function getReports() {
 		}),
 		db.invoice.findMany({
 			where: { status: { notIn: ['DRAFT', 'VOID'] } },
-			include: { client: { select: { clientType: true } }, payments: { select: { amountTzs: true } } }
+			include: {
+				client: { select: { clientType: true } },
+				payments: { select: { amountTzs: true } }
+			}
 		}),
 		db.booking.findMany({
 			where: { status: { in: ['COMPLETED', 'VERIFIED', 'INVOICED', 'PAID'] } },
@@ -163,7 +169,9 @@ export async function getReports() {
 		const balance = Math.max(invoice.totalTzs - paid, 0);
 		if (balance === 0 || !invoice.dueDate) continue;
 
-		const overdueDays = Math.floor((now.getTime() - invoice.dueDate.getTime()) / (24 * 60 * 60 * 1000));
+		const overdueDays = Math.floor(
+			(now.getTime() - invoice.dueDate.getTime()) / (24 * 60 * 60 * 1000)
+		);
 		if (overdueDays <= 0) aging.current += balance;
 		else if (overdueDays <= 30) aging.days30 += balance;
 		else if (overdueDays <= 60) aging.days60 += balance;

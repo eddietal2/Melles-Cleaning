@@ -22,21 +22,39 @@
 		<TableSkeleton rows={6} columns={6} />
 	{:then payload}
 		<details class="rounded-brand border border-border bg-background shadow-card">
-			<summary class="cursor-pointer px-5 py-4 text-sm font-semibold text-foreground">Log feedback</summary>
-			<form method="POST" action="?/create" class="grid gap-4 border-t border-border p-5 sm:grid-cols-2" use:enhance>
+			<summary class="cursor-pointer px-5 py-4 text-sm font-semibold text-foreground"
+				>Log feedback</summary
+			>
+			<form
+				method="POST"
+				action="?/create"
+				class="grid gap-4 border-t border-border p-5 sm:grid-cols-2"
+				use:enhance
+			>
 				<div class="sm:col-span-2">
 					<label for="bookingId" class="block text-sm font-medium text-foreground">Booking</label>
-					<select id="bookingId" name="bookingId" required class="mt-1 block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600">
+					<select
+						id="bookingId"
+						name="bookingId"
+						required
+						class="mt-1 block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
+					>
 						<option value="">Select a completed job</option>
 						{#each payload.bookings as booking (booking.id)}
-							<option value={booking.id}>{booking.bookingNumber} · {booking.client.displayName}</option>
+							<option value={booking.id}
+								>{booking.bookingNumber} · {booking.client.displayName}</option
+							>
 						{/each}
 					</select>
 					{#if errors.bookingId}<p class="mt-1 text-xs text-danger">{errors.bookingId}</p>{/if}
 				</div>
 				<div>
 					<label for="rating" class="block text-sm font-medium text-foreground">Rating</label>
-					<select id="rating" name="rating" class="mt-1 block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600">
+					<select
+						id="rating"
+						name="rating"
+						class="mt-1 block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
+					>
 						<option value="5">5 — Excellent</option>
 						<option value="4">4 — Good</option>
 						<option value="3">3 — Fair</option>
@@ -46,10 +64,17 @@
 				</div>
 				<div>
 					<label for="comment" class="block text-sm font-medium text-foreground">Comment</label>
-					<input id="comment" name="comment" class="mt-1 block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600" />
+					<input
+						id="comment"
+						name="comment"
+						class="mt-1 block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
+					/>
 				</div>
 				<div class="sm:col-span-2">
-					<button type="submit" class="rounded-brand bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700">
+					<button
+						type="submit"
+						class="rounded-brand bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700"
+					>
 						Save feedback
 					</button>
 				</div>
@@ -58,7 +83,9 @@
 
 		<div class="overflow-hidden rounded-brand border border-border bg-background shadow-card">
 			<table class="min-w-full divide-y divide-border text-sm">
-				<thead class="bg-surface-muted text-left text-xs tracking-wide text-muted-foreground uppercase">
+				<thead
+					class="bg-surface-muted text-left text-xs tracking-wide text-muted-foreground uppercase"
+				>
 					<tr>
 						<th class="px-5 py-3 font-medium">Client</th>
 						<th class="px-5 py-3 font-medium">Job</th>
@@ -90,14 +117,23 @@
 								<div class="flex items-center gap-3">
 									<form method="POST" action="?/setPublished" use:enhance>
 										<input type="hidden" name="id" value={entry.id} />
-										<input type="hidden" name="published" value={entry.isPublished ? 'false' : 'true'} />
-										<button type="submit" class="text-xs font-medium text-foreground hover:text-brand-700">
+										<input
+											type="hidden"
+											name="published"
+											value={entry.isPublished ? 'false' : 'true'}
+										/>
+										<button
+											type="submit"
+											class="text-xs font-medium text-foreground hover:text-brand-700"
+										>
 											{entry.isPublished ? 'Hide' : 'Publish'}
 										</button>
 									</form>
 									<form method="POST" action="?/delete" use:enhance>
 										<input type="hidden" name="id" value={entry.id} />
-										<button type="submit" class="text-xs text-muted-foreground hover:text-danger">Delete</button>
+										<button type="submit" class="text-xs text-muted-foreground hover:text-danger"
+											>Delete</button
+										>
 									</form>
 								</div>
 							</td>
@@ -109,7 +145,10 @@
 			</table>
 		</div>
 	{:catch}
-		<p class="rounded-brand border border-danger/30 bg-danger/5 px-3 py-2 text-sm text-danger" role="alert">
+		<p
+			class="rounded-brand border border-danger/30 bg-danger/5 px-3 py-2 text-sm text-danger"
+			role="alert"
+		>
 			Could not load feedback. Please refresh the page.
 		</p>
 	{/await}

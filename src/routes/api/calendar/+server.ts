@@ -9,11 +9,18 @@ import { addDays, startOfEatDay } from '$lib/utils/dates';
  */
 
 function icsDate(date: Date): string {
-	return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+	return date
+		.toISOString()
+		.replace(/[-:]/g, '')
+		.replace(/\.\d{3}/, '');
 }
 
 function escapeText(value: string): string {
-	return value.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+	return value
+		.replace(/\\/g, '\\\\')
+		.replace(/;/g, '\\;')
+		.replace(/,/g, '\\,')
+		.replace(/\n/g, '\\n');
 }
 
 export const GET: RequestHandler = async ({ locals, url }) => {

@@ -26,10 +26,16 @@
 
 <div class="space-y-8">
 	<div>
-		<a class="text-sm text-muted-foreground hover:text-brand-700" href="/admin/bookings">← Bookings</a>
+		<a class="text-sm text-muted-foreground hover:text-brand-700" href="/admin/bookings"
+			>← Bookings</a
+		>
 		<div class="mt-1 flex flex-wrap items-center gap-3">
-			<h1 class="text-2xl font-semibold tracking-tight text-foreground">{data.booking.bookingNumber}</h1>
-			<span class={badgeClass(bookingStatusTone(data.booking.status))}>{BOOKING_STATUS_LABELS[data.booking.status]}</span>
+			<h1 class="text-2xl font-semibold tracking-tight text-foreground">
+				{data.booking.bookingNumber}
+			</h1>
+			<span class={badgeClass(bookingStatusTone(data.booking.status))}
+				>{BOOKING_STATUS_LABELS[data.booking.status]}</span
+			>
 		</div>
 		<p class="mt-1 text-sm text-muted-foreground">
 			{data.booking.service.name} for {data.booking.client.displayName}
@@ -37,7 +43,12 @@
 	</div>
 
 	{#if message}
-		<p class="rounded-brand border border-danger/30 bg-danger/5 px-3 py-2 text-sm text-danger" role="alert">{message}</p>
+		<p
+			class="rounded-brand border border-danger/30 bg-danger/5 px-3 py-2 text-sm text-danger"
+			role="alert"
+		>
+			{message}
+		</p>
 	{/if}
 
 	<div class="grid gap-6 lg:grid-cols-3">
@@ -54,7 +65,9 @@
 				</div>
 				<div>
 					<dt class="text-xs tracking-wide text-muted-foreground uppercase">Recurrence</dt>
-					<dd class="text-sm text-foreground">{RECURRENCE_LABELS[data.booking.recurrenceFrequency]}</dd>
+					<dd class="text-sm text-foreground">
+						{RECURRENCE_LABELS[data.booking.recurrenceFrequency]}
+					</dd>
 				</div>
 				<div>
 					<dt class="text-xs tracking-wide text-muted-foreground uppercase">Quoted total</dt>
@@ -67,7 +80,9 @@
 				{#if data.booking.specialInstructions}
 					<div class="sm:col-span-2">
 						<dt class="text-xs tracking-wide text-muted-foreground uppercase">Instructions</dt>
-						<dd class="text-sm whitespace-pre-line text-foreground">{data.booking.specialInstructions}</dd>
+						<dd class="text-sm whitespace-pre-line text-foreground">
+							{data.booking.specialInstructions}
+						</dd>
 					</div>
 				{/if}
 			</dl>
@@ -76,24 +91,36 @@
 				{#each data.nextStatuses as status (status)}
 					<form method="POST" action="?/setStatus" use:enhance>
 						<input type="hidden" name="status" value={status} />
-						<button type="submit" class="rounded-brand border border-border px-3 py-1.5 text-xs font-medium text-foreground transition hover:border-brand-500 hover:text-brand-700">
+						<button
+							type="submit"
+							class="rounded-brand border border-border px-3 py-1.5 text-xs font-medium text-foreground transition hover:border-brand-500 hover:text-brand-700"
+						>
 							Mark {BOOKING_STATUS_LABELS[status]}
 						</button>
 					</form>
 				{/each}
 				{#if data.booking.invoice}
-					<a href="/admin/invoices/{data.booking.invoice.id}" class="rounded-brand border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:border-brand-500 hover:text-brand-700">
+					<a
+						href="/admin/invoices/{data.booking.invoice.id}"
+						class="rounded-brand border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:border-brand-500 hover:text-brand-700"
+					>
 						View invoice
 					</a>
 				{:else if ['VERIFIED', 'COMPLETED', 'IN_PROGRESS'].includes(data.booking.status)}
 					<form method="POST" action="?/generateInvoice" use:enhance>
-						<button type="submit" class="rounded-brand bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-700">
+						<button
+							type="submit"
+							class="rounded-brand bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-700"
+						>
 							Generate invoice
 						</button>
 					</form>
 				{/if}
 				<form method="POST" action="?/sendConfirmation" use:enhance>
-					<button type="submit" class="rounded-brand border border-border px-3 py-1.5 text-xs font-medium text-foreground transition hover:border-brand-500 hover:text-brand-700">
+					<button
+						type="submit"
+						class="rounded-brand border border-border px-3 py-1.5 text-xs font-medium text-foreground transition hover:border-brand-500 hover:text-brand-700"
+					>
 						Send confirmation
 					</button>
 				</form>
@@ -110,7 +137,10 @@
 						</span>
 						<span class="text-muted-foreground">{checkedCount}/{totalCount} items</span>
 					</div>
-					<a href="/admin/checklists/{data.booking.checklist.id}" class="mt-3 inline-block text-sm text-brand-700 hover:underline">
+					<a
+						href="/admin/checklists/{data.booking.checklist.id}"
+						class="mt-3 inline-block text-sm text-brand-700 hover:underline"
+					>
 						Open checklist →
 					</a>
 				{:else}
@@ -122,14 +152,19 @@
 				<div class="rounded-brand border border-border bg-background p-5 shadow-card">
 					<h2 class="text-sm font-semibold text-foreground">Invoice</h2>
 					<div class="mt-3 flex items-center justify-between text-sm">
-						<a href="/admin/invoices/{data.booking.invoice.id}" class="text-foreground hover:text-brand-700">
+						<a
+							href="/admin/invoices/{data.booking.invoice.id}"
+							class="text-foreground hover:text-brand-700"
+						>
 							{data.booking.invoice.invoiceNumber}
 						</a>
 						<span class={badgeClass(invoiceStatusTone(data.booking.invoice.status))}>
 							{INVOICE_STATUS_LABELS[data.booking.invoice.status]}
 						</span>
 					</div>
-					<p class="mt-2 text-sm text-muted-foreground">{formatTzs(data.booking.invoice.totalTzs)}</p>
+					<p class="mt-2 text-sm text-muted-foreground">
+						{formatTzs(data.booking.invoice.totalTzs)}
+					</p>
 				</div>
 			{/if}
 

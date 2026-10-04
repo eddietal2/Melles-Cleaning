@@ -50,7 +50,10 @@ export interface PaymentLike {
 
 /** Total amount received against a document. */
 export function totalPaid(payments: PaymentLike[]): number {
-	return payments.reduce((sum, payment) => sum + (Number.isFinite(payment.amountTzs) ? payment.amountTzs : 0), 0);
+	return payments.reduce(
+		(sum, payment) => sum + (Number.isFinite(payment.amountTzs) ? payment.amountTzs : 0),
+		0
+	);
 }
 
 /** Parses a TZS form input such as "40,000" or "TZS 40 000" into an integer. */

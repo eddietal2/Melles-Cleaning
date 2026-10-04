@@ -20,7 +20,12 @@ export const bookingSchema = z.object({
 	serviceId: z.string().trim().min(1, 'Choose a service.'),
 	scheduledDate: z.string().trim().min(1, 'Choose a scheduled date.'),
 	scheduledTime: z.string().trim().default('08:00'),
-	durationMinutes: z.coerce.number().int().min(30, 'Use at least 30 minutes.').max(1440).default(120),
+	durationMinutes: z.coerce
+		.number()
+		.int()
+		.min(30, 'Use at least 30 minutes.')
+		.max(1440)
+		.default(120),
 	recurrenceFrequency: z.enum(RECURRENCE_FREQUENCIES).default('ONE_TIME'),
 	addressSnapshot: optional(240),
 	specialInstructions: optional(2000),

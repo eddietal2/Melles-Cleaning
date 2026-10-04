@@ -25,8 +25,7 @@
 
 <div class="space-y-8">
 	<div>
-		<a class="text-sm text-muted-foreground hover:text-brand-700" href="/admin/clients"
-			>← Clients</a
+		<a class="text-sm text-muted-foreground hover:text-brand-700" href="/admin/clients">← Clients</a
 		>
 		<div class="mt-1 flex flex-wrap items-center gap-3">
 			<h1 class="text-2xl font-semibold tracking-tight text-foreground">
@@ -104,7 +103,8 @@
 						name="notes"
 						rows="3"
 						class="mt-1 block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
-					>{data.client.notes ?? ''}</textarea>
+						>{data.client.notes ?? ''}</textarea
+					>
 				</div>
 				<button
 					type="submit"
@@ -227,8 +227,9 @@
 			{#each data.client.bookings.slice(0, 6) as booking (booking.id)}
 				<li class="flex items-center justify-between gap-3 py-2 text-sm">
 					<div>
-						<a href="/admin/bookings/{booking.id}" class="font-medium text-foreground hover:text-brand-700"
-							>{booking.bookingNumber}</a
+						<a
+							href="/admin/bookings/{booking.id}"
+							class="font-medium text-foreground hover:text-brand-700">{booking.bookingNumber}</a
 						>
 						<p class="text-xs text-muted-foreground">
 							{booking.service.name} · {formatDateTime(booking.scheduledStart)}

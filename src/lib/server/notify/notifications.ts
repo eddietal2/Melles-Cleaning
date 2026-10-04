@@ -29,7 +29,11 @@ async function dispatch(
 	body: string
 ): Promise<NotificationOutcome> {
 	const email = recipient.email
-		? await sendEmail({ to: recipient.email, subject, html: `<p>${body.replace(/\n/g, '<br>')}</p>` })
+		? await sendEmail({
+				to: recipient.email,
+				subject,
+				html: `<p>${body.replace(/\n/g, '<br>')}</p>`
+			})
 		: false;
 	const whatsapp = recipient.phone ? await sendWhatsAppText(recipient.phone, body) : false;
 	const sms = recipient.phone && !whatsapp ? await sendSms(recipient.phone, body) : false;

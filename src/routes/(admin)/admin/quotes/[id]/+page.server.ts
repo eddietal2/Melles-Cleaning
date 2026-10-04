@@ -49,7 +49,12 @@ export const actions: Actions = {
 		}
 
 		await updateQuote(params.id, parsed.data, readLineItems(data));
-		await recordAudit({ userId: locals.user?.id, action: 'update', entityType: 'Quote', entityId: params.id });
+		await recordAudit({
+			userId: locals.user?.id,
+			action: 'update',
+			entityType: 'Quote',
+			entityId: params.id
+		});
 
 		return { success: true };
 	},
@@ -75,7 +80,10 @@ export const actions: Actions = {
 		if (!quote) return fail(404, { message: 'Quote not found.' });
 
 		const settings = await getSiteSettings();
-		const discountTzs = firstCleanDiscountTzs(quote.subtotalTzs, settings.firstCleanDiscountPercent);
+		const discountTzs = firstCleanDiscountTzs(
+			quote.subtotalTzs,
+			settings.firstCleanDiscountPercent
+		);
 		await setQuoteDiscount(params.id, discountTzs);
 		await recordAudit({
 			userId: locals.user?.id,
@@ -85,7 +93,10 @@ export const actions: Actions = {
 			diff: { promotion: 'FIRST_CLEAN', percent: settings.firstCleanDiscountPercent }
 		});
 
-		return { success: true, message: `First-clean ${settings.firstCleanDiscountPercent}% discount applied.` };
+		return {
+			success: true,
+			message: `First-clean ${settings.firstCleanDiscountPercent}% discount applied.`
+		};
 	},
 
 	applyReferralCredit: async ({ params, locals }) => {
