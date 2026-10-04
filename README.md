@@ -178,9 +178,9 @@ Owner editing lives under the admin area:
 
 | Area                          | What the owner can change                                                  |
 | ----------------------------- | -------------------------------------------------------------------------- |
-| `/admin/content/services`     | Create and edit services and their TZS pricing packages, show or hide them |
-| `/admin/content/faq`          | Add, edit, publish and delete FAQ entries                                  |
-| `/admin/content/testimonials` | Add, edit, publish and delete client reviews                               |
+| `/admin/website/services`     | Create and edit services and their TZS pricing packages, show or hide them |
+| `/admin/website/faq`          | Add, edit, publish and delete FAQ entries                                  |
+| `/admin/website/testimonials` | Add, edit, publish and delete client reviews                               |
 | `/admin/media`                | Upload photos to R2 and curate the public gallery                          |
 | `/admin/settings`             | Contact details, business hours and promotion values                       |
 

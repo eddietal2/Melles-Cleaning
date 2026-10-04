@@ -10,7 +10,7 @@
 <div class="space-y-8">
 	<div class="flex flex-wrap items-start justify-between gap-4">
 		<div>
-			<a class="text-sm text-muted-foreground hover:text-brand-700" href="/admin/content"
+			<a class="text-sm text-muted-foreground hover:text-brand-700" href="/admin/website"
 				>← Website content</a
 			>
 			<h1 class="mt-1 text-2xl font-semibold tracking-tight text-foreground">Services & pricing</h1>
@@ -80,7 +80,7 @@
 
 				<div class="flex flex-wrap items-center gap-2">
 					<a
-						href="/admin/content/services/{service.id}"
+						href="/admin/website/services/{service.id}"
 						class="rounded-brand border border-border px-3 py-1.5 text-xs font-medium text-foreground transition hover:border-brand-500 hover:text-brand-700"
 						>Edit</a
 					>

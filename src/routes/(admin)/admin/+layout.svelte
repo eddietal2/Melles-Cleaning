@@ -5,7 +5,8 @@
 	let { data, children }: LayoutProps = $props();
 
 	const nav = [
-		{ href: '/admin', label: 'Dashboard' },
+		{ href: '/admin', label: 'Dashboard' },		
+		{ href: '/admin/website', label: 'Website' },
 		{ href: '/admin/clients', label: 'Clients' },
 		{ href: '/admin/bookings', label: 'Bookings' },
 		{ href: '/admin/quotes', label: 'Quotes' },
@@ -14,7 +15,6 @@
 		{ href: '/admin/checklists', label: 'Checklists' },
 		{ href: '/admin/feedback', label: 'Feedback' },
 		{ href: '/admin/reports', label: 'Reports' },
-		{ href: '/admin/content', label: 'Content' },
 		{ href: '/admin/media', label: 'Media' },
 		{ href: '/admin/settings', label: 'Settings' }
 	];
@@ -45,11 +45,7 @@
 <div class="flex h-dvh overflow-hidden bg-surface">
 	<aside class="hidden h-full w-60 shrink-0 flex-col border-r border-border bg-background lg:flex">
 		<div class="flex h-16 items-center gap-2 border-b border-border px-5">
-			<span
-				class="grid h-8 w-8 place-items-center rounded-brand bg-brand-600 text-sm font-bold text-white"
-				aria-hidden="true">M</span
-			>
-			<span class="text-sm font-semibold text-foreground">Melles CRM</span>
+			<img src="/brand/MC_Logo_Dark.png" alt="Melles Cleaning Logo" class="relative bottom-1 h-8" />
 		</div>
 
 		<nav class="flex-1 space-y-1 overflow-y-auto p-3" aria-label="Admin">

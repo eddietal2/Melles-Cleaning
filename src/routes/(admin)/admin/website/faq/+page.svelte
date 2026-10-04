@@ -12,7 +12,7 @@
 
 <div class="space-y-8">
 	<div>
-		<a class="text-sm text-muted-foreground hover:text-brand-700" href="/admin/content"
+		<a class="text-sm text-muted-foreground hover:text-brand-700" href="/admin/website"
 			>← Website content</a
 		>
 		<h1 class="mt-1 text-2xl font-semibold tracking-tight text-foreground">FAQ</h1>

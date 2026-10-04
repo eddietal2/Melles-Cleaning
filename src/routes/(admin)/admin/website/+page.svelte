@@ -5,21 +5,21 @@
 
 	const sections = $derived([
 		{
-			href: '/admin/content/services',
+			href: '/admin/website/services',
 			title: 'Services & pricing',
 			description: 'Edit service pages and the TZS pricing packages shown on the website.',
 			count: data.counts.services,
 			countLabel: 'services'
 		},
 		{
-			href: '/admin/content/faq',
+			href: '/admin/website/faq',
 			title: 'FAQ',
 			description: 'Questions and answers displayed on the site.',
 			count: data.counts.faq,
 			countLabel: 'items'
 		},
 		{
-			href: '/admin/content/testimonials',
+			href: '/admin/website/testimonials',
 			title: 'Testimonials',
 			description: 'Client reviews shown on the homepage.',
 			count: data.counts.testimonials,

@@ -123,6 +123,6 @@ export const actions: Actions = {
 
 		await db.service.delete({ where: { id: params.id } });
 
-		throw redirect(303, '/admin/content/services');
+		throw redirect(303, '/admin/website/services');
 	}
 };
