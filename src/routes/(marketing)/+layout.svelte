@@ -1,11 +1,42 @@
 <script lang="ts">
+	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import type { LayoutProps } from './$types';
-	import { locales } from '$lib/paraglide/runtime';
+	import { locales, setLocale } from '$lib/paraglide/runtime';
 	import * as m from '$lib/paraglide/messages.js';
 	import { jsonLdScript } from '$lib/utils/jsonld';
 
 	let { data, children }: LayoutProps = $props();
+
+	/**
+	 * Persist the locale in the Paraglide cookie and re-run load functions so the
+	 * server renders in the new language. The layout is keyed on `data.locale`
+	 * (below) so message calls re-evaluate — Paraglide's locale isn't a Svelte
+	 * signal, so without a remount the stale text would persist. The plain link
+	 * still works without JavaScript via the `?lang` handler in hooks.
+	 */
+	let pendingLocale = $state<(typeof locales)[number] | null>(null);
+	const activeLocale = $derived(pendingLocale ?? data.locale);
+
+	async function switchLocale(event: MouseEvent, locale: (typeof locales)[number]) {
+		if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) {
+			return;
+		}
+		if (locale === activeLocale) {
+			return;
+		}
+
+		event.preventDefault();
+		// Highlight the choice immediately, then persist and re-render.
+		pendingLocale = locale;
+
+		try {
+			await setLocale(locale, { reload: false });
+			await invalidateAll();
+		} finally {
+			pendingLocale = null;
+		}
+	}
 
 	const nav = [
 		{ href: '/', label: m.nav_home },
@@ -46,7 +77,8 @@
 	{@html data.analytics}
 </svelte:head>
 
-<div class="flex min-h-dvh flex-col">
+{#key data.locale}
+	<div class="flex min-h-dvh flex-col">
 	<header class="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
 		<div class="container-page flex h-16 items-center justify-between gap-4">
 			<a href="/" class="flex items-center gap-2">
@@ -75,10 +107,11 @@
 					{#each locales as locale (locale)}
 						<a
 							href="{page.url.pathname}?lang={locale}"
-							class="rounded-pill px-2 py-0.5 font-medium transition {data.locale === locale
+							onclick={(event) => switchLocale(event, locale)}
+							class="rounded-pill px-2 py-0.5 font-medium transition {activeLocale === locale
 								? 'bg-brand-50 text-brand-700'
 								: 'text-muted-foreground hover:text-foreground'}"
-							aria-current={data.locale === locale ? 'true' : undefined}
+							aria-current={activeLocale === locale ? 'true' : undefined}
 						>
 							{locale.toUpperCase()}
 						</a>
@@ -154,13 +187,14 @@
 				</ul>
 			</div>
 		</div>
-		<div class="border-t border-white/10 py-5">
-			<p class="container-page text-xs text-slate-400">
-				{m.footer_rights({
-					year: String(new Date().getFullYear()),
-					business: settings.businessName
-				})}
-			</p>
-		</div>
-	</footer>
-</div>
+			<div class="border-t border-white/10 py-5">
+				<p class="container-page text-xs text-slate-400">
+					{m.footer_rights({
+						year: String(new Date().getFullYear()),
+						business: settings.businessName
+					})}
+				</p>
+			</div>
+		</footer>
+	</div>
+{/key}
