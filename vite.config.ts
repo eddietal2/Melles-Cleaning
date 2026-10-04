@@ -20,7 +20,7 @@ export default defineConfig({
 		paraglideVitePlugin({
 			project: './project.inlang',
 			outdir: './src/lib/paraglide',
-			strategy: ['cookie', 'preferredLanguage', 'baseLocale'],
+			strategy: ['cookie', 'baseLocale'],
 			emitTsDeclarations: true,
 			isServer: 'import.meta.env.SSR'
 		}),

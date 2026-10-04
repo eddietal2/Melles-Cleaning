@@ -18,6 +18,18 @@
 	let pendingLocale = $state<(typeof locales)[number] | null>(null);
 	const activeLocale = $derived(pendingLocale ?? data.locale);
 
+	/** Full language names for the segmented switcher. */
+	const localeLabels: Record<(typeof locales)[number], () => string> = {
+		en: m.lang_en,
+		sw: m.lang_sw
+	};
+
+	/** The nav link for the current route, matching nested paths too. */
+	function isActive(href: string): boolean {
+		const pathname = page.url.pathname;
+		return href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`);
+	}
+
 	async function switchLocale(event: MouseEvent, locale: (typeof locales)[number]) {
 		if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) {
 			return;
@@ -94,7 +106,10 @@
 				{#each nav as item (item.href)}
 					<a
 						href={item.href}
-						class="text-sm font-medium text-muted-foreground transition hover:text-brand-700"
+						class="relative text-sm font-medium transition {isActive(item.href)
+							? 'text-brand-700 after:absolute after:inset-x-0 after:-bottom-1.5 after:h-0.5 after:rounded-pill after:bg-brand-600'
+							: 'text-muted-foreground hover:text-brand-700'}"
+						aria-current={isActive(item.href) ? 'page' : undefined}
 					>
 						{item.label()}
 					</a>
@@ -102,17 +117,21 @@
 			</nav>
 
 			<div class="flex items-center gap-3">
-				<div class="hidden items-center gap-1 text-xs sm:flex" aria-label={m.language()}>
+				<div
+					class="hidden items-center rounded-pill border border-border bg-surface-muted p-0.5 text-xs sm:flex"
+					role="group"
+					aria-label={m.language()}
+				>
 					{#each locales as locale (locale)}
 						<a
 							href="{page.url.pathname}?lang={locale}"
 							onclick={(event) => switchLocale(event, locale)}
-							class="rounded-pill px-2 py-0.5 font-medium transition {activeLocale === locale
-								? 'bg-brand-50 text-brand-700'
+							class="rounded-pill px-3 py-1 font-medium transition {activeLocale === locale
+								? 'bg-brand-600 text-white shadow-sm'
 								: 'text-muted-foreground hover:text-foreground'}"
 							aria-current={activeLocale === locale ? 'true' : undefined}
 						>
-							{locale.toUpperCase()}
+							{localeLabels[locale]()}
 						</a>
 					{/each}
 				</div>

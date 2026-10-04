@@ -230,7 +230,7 @@ checklist on creation, and status changes are constrained by the lifecycle rules
 
 | Area             | What shipped                                                                                                 |
 | ---------------- | ------------------------------------------------------------------------------------------------------------ |
-| Bilingual EN/SW  | Paraglide JS with cookie + `Accept-Language` negotiation; switch with `?lang=en` / `?lang=sw`                |
+| Bilingual SW/EN  | Paraglide JS with Swahili as the default and an English switch, persisted in a cookie (`?lang=` fallback)          |
 | WhatsApp         | Cloud API sender with a click-to-chat fallback — [`whatsapp.ts`](src/lib/server/notify/whatsapp.ts)          |
 | Email + SMS      | Resend transactional email and an optional SMS gateway — [`email.ts`](src/lib/server/notify/email.ts)        |
 | Mobile money     | Aggregator collections plus a signed webhook that records payments and reconciles invoices                   |

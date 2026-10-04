@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import type { LayoutProps } from './$types';
 
 	let { data, children }: LayoutProps = $props();
@@ -17,6 +18,14 @@
 		{ href: '/admin/media', label: 'Media' },
 		{ href: '/admin/settings', label: 'Settings' }
 	];
+
+	/** The sidebar link for the current route; `/admin` only matches exactly. */
+	function isActive(href: string): boolean {
+		const pathname = page.url.pathname;
+		return href === '/admin'
+			? pathname === '/admin'
+			: pathname === href || pathname.startsWith(`${href}/`);
+	}
 
 	const initials = $derived(
 		data.user.name
@@ -47,7 +56,10 @@
 			{#each nav as item (item.href)}
 				<a
 					href={item.href}
-					class="block rounded-brand px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-surface-muted hover:text-foreground"
+					class="block rounded-brand px-3 py-2 text-sm font-medium transition {isActive(item.href)
+						? 'bg-brand-50 text-brand-700'
+						: 'text-muted-foreground hover:bg-surface-muted hover:text-foreground'}"
+					aria-current={isActive(item.href) ? 'page' : undefined}
 				>
 					{item.label}
 				</a>

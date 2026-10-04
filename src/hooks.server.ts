@@ -69,6 +69,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 			throw redirect(303, `/login?redirectTo=${redirectTo}`);
 		}
 
-		return resolve(event);
+		// Reflect the negotiated locale on <html lang> for accessibility and SEO.
+		return resolve(event, {
+			transformPageChunk: ({ html }) => html.replace('%locale%', locale)
+		});
 	});
 };
