@@ -6,21 +6,22 @@ import { recordAudit } from '$lib/server/audit';
 import { createFeedback, deleteFeedback, listFeedback, setFeedbackPublished } from '$lib/server/crm/feedback';
 import { db } from '$lib/server/db';
 
-export const load: PageServerLoad = async () => {
-	const [feedback, bookings] = await Promise.all([
-		listFeedback(),
-		db.booking.findMany({
-			where: { status: { in: ['COMPLETED', 'VERIFIED', 'INVOICED', 'PAID'] } },
-			orderBy: { scheduledStart: 'desc' },
-			select: {
-				id: true,
-				bookingNumber: true,
-				client: { select: { displayName: true } }
-			}
-		})
-	]);
-
-	return { feedback, bookings };
+export const load: PageServerLoad = () => {
+	// Streamed so the page frame renders immediately.
+	return {
+		streamed: Promise.all([
+			listFeedback(),
+			db.booking.findMany({
+				where: { status: { in: ['COMPLETED', 'VERIFIED', 'INVOICED', 'PAID'] } },
+				orderBy: { scheduledStart: 'desc' },
+				select: {
+					id: true,
+					bookingNumber: true,
+					client: { select: { displayName: true } }
+				}
+			})
+		]).then(([feedback, bookings]) => ({ feedback, bookings }))
+	};
 };
 
 export const actions: Actions = {

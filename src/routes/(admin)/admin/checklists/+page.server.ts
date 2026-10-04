@@ -3,22 +3,27 @@ import type { Actions, PageServerLoad } from './$types';
 import { ensureChecklistForBooking, listJobChecklists, listTemplates } from '$lib/server/crm/checklists';
 import { db } from '$lib/server/db';
 
-export const load: PageServerLoad = async () => {
-	const [templates, jobChecklists, bookingsWithoutChecklist] = await Promise.all([
-		listTemplates(),
-		listJobChecklists(),
-		db.booking.findMany({
-			where: { checklist: null, status: { notIn: ['CANCELLED'] } },
-			orderBy: { scheduledStart: 'desc' },
-			select: {
-				id: true,
-				bookingNumber: true,
-				client: { select: { displayName: true } }
-			}
-		})
-	]);
-
-	return { templates, jobChecklists, bookingsWithoutChecklist };
+export const load: PageServerLoad = () => {
+	// Streamed so the page frame renders immediately.
+	return {
+		streamed: Promise.all([
+			listTemplates(),
+			listJobChecklists(),
+			db.booking.findMany({
+				where: { checklist: null, status: { notIn: ['CANCELLED'] } },
+				orderBy: { scheduledStart: 'desc' },
+				select: {
+					id: true,
+					bookingNumber: true,
+					client: { select: { displayName: true } }
+				}
+			})
+		]).then(([templates, jobChecklists, bookingsWithoutChecklist]) => ({
+			templates,
+			jobChecklists,
+			bookingsWithoutChecklist
+		}))
+	};
 };
 
 export const actions: Actions = {

@@ -5,8 +5,9 @@ import { fieldErrors, formDataToObject } from '$lib/schemas/form';
 import { recordAudit } from '$lib/server/audit';
 import { addClientContact, createClient, deleteClient, listClients } from '$lib/server/crm/clients';
 
-export const load: PageServerLoad = async () => {
-	return { clients: await listClients() };
+export const load: PageServerLoad = () => {
+	// Streamed so the page frame renders immediately.
+	return { streamed: listClients() };
 };
 
 export const actions: Actions = {

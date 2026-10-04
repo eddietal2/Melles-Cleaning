@@ -6,23 +6,24 @@ import { recordAudit } from '$lib/server/audit';
 import { listPayments, recordPayment } from '$lib/server/crm/payments';
 import { db } from '$lib/server/db';
 
-export const load: PageServerLoad = async () => {
-	const [payments, openInvoices] = await Promise.all([
-		listPayments(),
-		db.invoice.findMany({
-			where: { status: { in: ['DRAFT', 'ISSUED', 'PARTIAL', 'OVERDUE'] } },
-			orderBy: { createdAt: 'desc' },
-			select: {
-				id: true,
-				invoiceNumber: true,
-				totalTzs: true,
-				payments: { select: { amountTzs: true } },
-				client: { select: { displayName: true } }
-			}
-		})
-	]);
-
-	return { payments, openInvoices };
+export const load: PageServerLoad = () => {
+	// Streamed so the page frame renders immediately.
+	return {
+		streamed: Promise.all([
+			listPayments(),
+			db.invoice.findMany({
+				where: { status: { in: ['DRAFT', 'ISSUED', 'PARTIAL', 'OVERDUE'] } },
+				orderBy: { createdAt: 'desc' },
+				select: {
+					id: true,
+					invoiceNumber: true,
+					totalTzs: true,
+					payments: { select: { amountTzs: true } },
+					client: { select: { displayName: true } }
+				}
+			})
+		]).then(([payments, openInvoices]) => ({ payments, openInvoices }))
+	};
 };
 
 export const actions: Actions = {

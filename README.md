@@ -107,6 +107,11 @@ prisma/
 - **`#lib/*` imports** resolve through `package.json#imports`, but only with an explicit file
   extension (for example `#lib/assets/favicon.svg`). TypeScript-to-TypeScript imports inside
   `src/lib/server` use relative paths because extensionless `#lib` specifiers do not resolve.
+- **Streamed admin data.** The CRM dashboard, reports and list `load` functions return promises
+  rather than awaiting them, so the page shell renders immediately and the content streams in
+  behind a [`Skeleton`](src/lib/components/ui/skeleton.svelte) / [`TableSkeleton`](src/lib/components/ui/table-skeleton.svelte)
+  placeholder. Wrap streamed data in `{#await}` and provide a `{:catch}` state. Marketing pages
+  stay fully server-rendered for SEO.
 - **Vercel adapter is conditional.** `vite.config.ts` uses `adapter-vercel` only when
   `process.env.VERCEL` is set, and `adapter-auto` otherwise. This is because the Vercel adapter
   writes symlinks, which fail on Windows inside a OneDrive folder (`EPERM`). Production builds on

@@ -6,16 +6,17 @@ import { recordAudit } from '$lib/server/audit';
 import { createQuote, listQuotes } from '$lib/server/crm/quotes';
 import { db } from '$lib/server/db';
 
-export const load: PageServerLoad = async () => {
-	const [quotes, clients] = await Promise.all([
-		listQuotes(),
-		db.client.findMany({
-			orderBy: { displayName: 'asc' },
-			select: { id: true, displayName: true }
-		})
-	]);
-
-	return { quotes, clients };
+export const load: PageServerLoad = () => {
+	// Streamed so the page frame renders immediately.
+	return {
+		streamed: Promise.all([
+			listQuotes(),
+			db.client.findMany({
+				orderBy: { displayName: 'asc' },
+				select: { id: true, displayName: true }
+			})
+		]).then(([quotes, clients]) => ({ quotes, clients }))
+	};
 };
 
 export const actions: Actions = {

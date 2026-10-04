@@ -98,6 +98,40 @@
 	}
 }
 
+/* Reusable loading placeholder with a subtle shimmer. */
+.skeleton {
+	position: relative;
+	overflow: hidden;
+	border-radius: calc(var(--radius-brand) / 2);
+	background-color: var(--color-surface-muted);
+}
+
+.skeleton::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	transform: translateX(-100%);
+	background-image: linear-gradient(
+		90deg,
+		transparent,
+		rgb(255 255 255 / 0.55),
+		transparent
+	);
+	animation: melles-shimmer 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.skeleton::after {
+		animation: none;
+	}
+}
+
+@keyframes melles-shimmer {
+	100% {
+		transform: translateX(100%);
+	}
+}
+
 /* Indeterminate top progress bar shown during client-side navigation. */
 .nav-progress {
 	width: 40%;

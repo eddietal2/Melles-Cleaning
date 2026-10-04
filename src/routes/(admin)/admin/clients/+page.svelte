@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { PageProps } from './$types';
+	import TableSkeleton from '$lib/components/ui/table-skeleton.svelte';
 	import {
 		CLIENT_STATUS_LABELS,
 		CLIENT_TYPE_LABELS,
@@ -100,55 +101,63 @@
 		</form>
 	</details>
 
-	<div class="overflow-hidden rounded-brand border border-border bg-background shadow-card">
-		<table class="min-w-full divide-y divide-border text-sm">
-			<thead class="bg-surface-muted text-left text-xs tracking-wide text-muted-foreground uppercase">
-				<tr>
-					<th class="px-5 py-3 font-medium">Client</th>
-					<th class="px-5 py-3 font-medium">Status</th>
-					<th class="px-5 py-3 font-medium">Jobs</th>
-					<th class="px-5 py-3 font-medium">Invoices</th>
-					<th class="px-5 py-3"></th>
-				</tr>
-			</thead>
-			<tbody class="divide-y divide-border">
-				{#each data.clients as client (client.id)}
+	{#await data.streamed}
+		<TableSkeleton rows={6} columns={5} />
+	{:then clients}
+		<div class="overflow-hidden rounded-brand border border-border bg-background shadow-card">
+			<table class="min-w-full divide-y divide-border text-sm">
+				<thead class="bg-surface-muted text-left text-xs tracking-wide text-muted-foreground uppercase">
 					<tr>
-						<td class="px-5 py-3">
-							<a
-								href="/admin/clients/{client.id}"
-								class="font-medium text-foreground hover:text-brand-700">{client.displayName}</a
-							>
-							<p class="text-xs text-muted-foreground">
-								{CLIENT_TYPE_LABELS[client.clientType]}{client.area ? ` · ${client.area}` : ''}
-							</p>
-						</td>
-						<td class="px-5 py-3">
-							<span class={badgeClass(clientStatusTone(client.status))}
-								>{CLIENT_STATUS_LABELS[client.status]}</span
-							>
-						</td>
-						<td class="px-5 py-3 text-muted-foreground">{client._count.bookings}</td>
-						<td class="px-5 py-3 text-muted-foreground">{client._count.invoices}</td>
-						<td class="px-5 py-3 text-right">
-							<form method="POST" action="?/delete" use:enhance>
-								<input type="hidden" name="id" value={client.id} />
-								<button
-									type="submit"
-									class="text-xs text-muted-foreground transition hover:text-danger"
-									onclick={(event) => {
-										if (!confirm('Delete this client and all related records?')) event.preventDefault();
-									}}
-								>
-									Delete
-								</button>
-							</form>
-						</td>
+						<th class="px-5 py-3 font-medium">Client</th>
+						<th class="px-5 py-3 font-medium">Status</th>
+						<th class="px-5 py-3 font-medium">Jobs</th>
+						<th class="px-5 py-3 font-medium">Invoices</th>
+						<th class="px-5 py-3"></th>
 					</tr>
-				{:else}
-					<tr><td class="px-5 py-6 text-muted-foreground" colspan="5">No clients yet.</td></tr>
-				{/each}
-			</tbody>
-		</table>
-	</div>
+				</thead>
+				<tbody class="divide-y divide-border">
+					{#each clients as client (client.id)}
+						<tr>
+							<td class="px-5 py-3">
+								<a
+									href="/admin/clients/{client.id}"
+									class="font-medium text-foreground hover:text-brand-700">{client.displayName}</a
+								>
+								<p class="text-xs text-muted-foreground">
+									{CLIENT_TYPE_LABELS[client.clientType]}{client.area ? ` · ${client.area}` : ''}
+								</p>
+							</td>
+							<td class="px-5 py-3">
+								<span class={badgeClass(clientStatusTone(client.status))}
+									>{CLIENT_STATUS_LABELS[client.status]}</span
+								>
+							</td>
+							<td class="px-5 py-3 text-muted-foreground">{client._count.bookings}</td>
+							<td class="px-5 py-3 text-muted-foreground">{client._count.invoices}</td>
+							<td class="px-5 py-3 text-right">
+								<form method="POST" action="?/delete" use:enhance>
+									<input type="hidden" name="id" value={client.id} />
+									<button
+										type="submit"
+										class="text-xs text-muted-foreground transition hover:text-danger"
+										onclick={(event) => {
+											if (!confirm('Delete this client and all related records?')) event.preventDefault();
+										}}
+									>
+										Delete
+									</button>
+								</form>
+							</td>
+						</tr>
+					{:else}
+						<tr><td class="px-5 py-6 text-muted-foreground" colspan="5">No clients yet.</td></tr>
+					{/each}
+				</tbody>
+			</table>
+		</div>
+	{:catch}
+		<p class="rounded-brand border border-danger/30 bg-danger/5 px-3 py-2 text-sm text-danger" role="alert">
+			Could not load clients. Please refresh the page.
+		</p>
+	{/await}
 </div>

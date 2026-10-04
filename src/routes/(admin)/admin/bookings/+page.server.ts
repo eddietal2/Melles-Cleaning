@@ -7,21 +7,22 @@ import { createBooking, listBookings, updateBookingStatus } from '$lib/server/cr
 import { db } from '$lib/server/db';
 import type { BookingStatus } from '$lib/server/generated/prisma/enums';
 
-export const load: PageServerLoad = async () => {
-	const [bookings, clients, services] = await Promise.all([
-		listBookings(),
-		db.client.findMany({
-			orderBy: { displayName: 'asc' },
-			select: { id: true, displayName: true }
-		}),
-		db.service.findMany({
-			where: { isActive: true },
-			orderBy: { sortOrder: 'asc' },
-			select: { id: true, name: true }
-		})
-	]);
-
-	return { bookings, clients, services };
+export const load: PageServerLoad = () => {
+	// Streamed so the page frame renders immediately.
+	return {
+		streamed: Promise.all([
+			listBookings(),
+			db.client.findMany({
+				orderBy: { displayName: 'asc' },
+				select: { id: true, displayName: true }
+			}),
+			db.service.findMany({
+				where: { isActive: true },
+				orderBy: { sortOrder: 'asc' },
+				select: { id: true, name: true }
+			})
+		]).then(([bookings, clients, services]) => ({ bookings, clients, services }))
+	};
 };
 
 export const actions: Actions = {
