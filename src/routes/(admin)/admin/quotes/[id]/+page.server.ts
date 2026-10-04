@@ -18,13 +18,9 @@ import { db } from '$lib/server/db';
 import type { QuoteStatus } from '$lib/server/generated/prisma/enums';
 
 export const load: PageServerLoad = async ({ params }) => {
-	const quote = await getQuote(params.id);
-
-	if (!quote) {
-		throw error(404, 'Quote not found.');
-	}
-
-	const [clients, services] = await Promise.all([
+	// All three lookups are independent, so run them together.
+	const [quote, clients, services] = await Promise.all([
+		getQuote(params.id),
 		db.client.findMany({
 			orderBy: { displayName: 'asc' },
 			select: { id: true, displayName: true }
@@ -35,6 +31,10 @@ export const load: PageServerLoad = async ({ params }) => {
 			select: { id: true, name: true }
 		})
 	]);
+
+	if (!quote) {
+		throw error(404, 'Quote not found.');
+	}
 
 	return { quote, clients, services };
 };

@@ -24,16 +24,18 @@ import { firstCleanDiscountTzs } from '$lib/server/pricing/engine';
 import { db } from '$lib/server/db';
 
 export const load: PageServerLoad = async ({ params }) => {
-	const invoice = await getInvoice(params.id);
+	// Fetch the invoice and the client options in parallel to minimise round trips.
+	const [invoice, clients] = await Promise.all([
+		getInvoice(params.id),
+		db.client.findMany({
+			orderBy: { displayName: 'asc' },
+			select: { id: true, displayName: true }
+		})
+	]);
 
 	if (!invoice) {
 		throw error(404, 'Invoice not found.');
 	}
-
-	const clients = await db.client.findMany({
-		orderBy: { displayName: 'asc' },
-		select: { id: true, displayName: true }
-	});
 
 	return { invoice, clients };
 };

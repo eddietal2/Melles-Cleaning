@@ -12,13 +12,15 @@ import {
 import { findPortalUserForClient, inviteClientToPortal } from '$lib/server/portal/access';
 
 export const load: PageServerLoad = async ({ params }) => {
-	const client = await getClient(params.id);
+	// Run the client lookup and portal-access check together.
+	const [client, portalUser] = await Promise.all([
+		getClient(params.id),
+		findPortalUserForClient(params.id)
+	]);
 
 	if (!client) {
 		throw error(404, 'Client not found.');
 	}
-
-	const portalUser = await findPortalUserForClient(params.id);
 
 	return { client, portalUser };
 };

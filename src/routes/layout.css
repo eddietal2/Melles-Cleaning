@@ -98,6 +98,22 @@
 	}
 }
 
+/* Indeterminate top progress bar shown during client-side navigation. */
+.nav-progress {
+	width: 40%;
+	will-change: transform;
+	animation: melles-nav-progress 1s ease-in-out infinite;
+}
+
+@keyframes melles-nav-progress {
+	0% {
+		transform: translateX(-100%);
+	}
+	100% {
+		transform: translateX(300%);
+	}
+}
+
 /* Shared layout container for marketing and CRM surfaces. */
 @utility container-page {
 	margin-inline: auto;

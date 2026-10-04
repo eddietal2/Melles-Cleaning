@@ -9,13 +9,19 @@ import { SESSION_COOKIE_NAME, validateSessionToken } from './lib/server/auth/ses
  * `event.locals.locale` are populated before any load function or form action runs.
  *
  * Locale switching uses a `?lang=en|sw` query parameter: we persist the choice in
- * Paraglide's cookie and redirect to the clean URL, so the very next render is in
- * the requested language (and no client JavaScript is required).
+ * Paraglide's cookie and redirect to the clean URL.
  *
- * Route protection is centralized: anything under `/admin` requires a session, and
- * users are bounced to the login page with a `redirectTo` they return to after signing in.
+ * Session resolution is deliberately lazy: public marketing pages never read
+ * `locals.user`, so we skip the database lookup for them. That removes a database
+ * round trip from every marketing navigation. Admin, portal, auth and API routes
+ * still resolve the session before their guards run.
  */
 const PROTECTED_PREFIXES = ['/admin', '/portal'];
+const SESSION_PREFIXES = ['/admin', '/portal', '/login', '/logout'];
+
+function matchesPrefix(path: string, prefixes: string[]): boolean {
+	return prefixes.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
+}
 
 function isKnownLocale(value: string | null): value is (typeof locales)[number] {
 	return value !== null && (locales as readonly string[]).includes(value);
@@ -41,21 +47,24 @@ export const handle: Handle = async ({ event, resolve }) => {
 	return paraglideMiddleware(event.request, async ({ locale }) => {
 		event.locals.locale = locale;
 
-		const token = event.cookies.get(SESSION_COOKIE_NAME) ?? null;
-
-		const { session, user } = token
-			? await validateSessionToken(token)
-			: { session: null, user: null };
-
-		event.locals.session = session;
-		event.locals.user = user;
-
 		const path = event.url.pathname;
-		const isProtected = PROTECTED_PREFIXES.some(
-			(prefix) => path === prefix || path.startsWith(`${prefix}/`)
-		);
+		const needsSession = matchesPrefix(path, SESSION_PREFIXES) || path.startsWith('/api/');
 
-		if (isProtected && !event.locals.user) {
+		if (needsSession) {
+			const token = event.cookies.get(SESSION_COOKIE_NAME) ?? null;
+
+			const { session, user } = token
+				? await validateSessionToken(token)
+				: { session: null, user: null };
+
+			event.locals.session = session;
+			event.locals.user = user;
+		} else {
+			event.locals.session = null;
+			event.locals.user = null;
+		}
+
+		if (matchesPrefix(path, PROTECTED_PREFIXES) && !event.locals.user) {
 			const redirectTo = encodeURIComponent(`${path}${event.url.search}`);
 			throw redirect(303, `/login?redirectTo=${redirectTo}`);
 		}

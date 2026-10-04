@@ -2,6 +2,7 @@ import type { AccountInput } from '$lib/schemas/account';
 import { recordAudit } from '../audit';
 import { db } from '../db';
 import { hashPassword, verifyPassword } from './password';
+import { clearSessionCache } from './session';
 
 export type AccountUpdateResult =
 	| { error: string; field?: keyof AccountInput }
@@ -58,6 +59,8 @@ export async function updateAccount(
 		await db.session.deleteMany({
 			where: { userId, ...(currentSessionId ? { NOT: { id: currentSessionId } } : {}) }
 		});
+		// Drop cached validations so revoked sessions stop working immediately.
+		clearSessionCache();
 	}
 
 	await recordAudit({

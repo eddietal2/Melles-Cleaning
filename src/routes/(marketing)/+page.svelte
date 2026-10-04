@@ -32,21 +32,6 @@
 			price: '150,000 – 250,000 TZS / month'
 		}
 	];
-
-	const pillars = [
-		{
-			title: 'Vetted, uniformed staff',
-			body: 'Background-checked cleaners arrive in branded uniform with a documented service agreement.'
-		},
-		{
-			title: '20-point quality checklist',
-			body: 'Every visit is signed off against a standard checklist, then followed up within 24 hours.'
-		},
-		{
-			title: 'Transparent tiered pricing',
-			body: 'Fixed-rate menu pricing with no hidden costs, plus custom quotes for heavy-duty work.'
-		}
-	];
 </script>
 
 <svelte:head>
@@ -83,14 +68,6 @@
 					>See pricing</a
 				>
 			</div>
-		</div>
-		<div class="grid gap-4 sm:grid-cols-2">
-			{#each pillars as pillar (pillar.title)}
-				<div class="rounded-brand border border-border bg-background p-5 shadow-card">
-					<p class="text-sm font-semibold text-foreground">{pillar.title}</p>
-					<p class="mt-2 text-sm leading-relaxed text-muted-foreground">{pillar.body}</p>
-				</div>
-			{/each}
 		</div>
 	</div>
 </section>
