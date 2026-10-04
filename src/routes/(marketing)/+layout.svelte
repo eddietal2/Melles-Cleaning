@@ -93,10 +93,7 @@
 		<header class="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
 			<div class="container-page flex h-16 items-center justify-between gap-4">
 				<a href="/" class="flex items-center gap-2">
-					<span
-						class="grid h-9 w-9 place-items-center rounded-brand bg-brand-600 font-bold text-white"
-						aria-hidden="true">M</span
-					>
+					<img src="/brand/MC_Logo_Dark.png" alt="Melles Cleaning Logo" class="h-8 relative bottom-1">
 					<span class="text-base font-semibold tracking-tight text-foreground"
 						>{settings.businessName}</span
 					>
