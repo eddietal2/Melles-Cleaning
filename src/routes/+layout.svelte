@@ -15,7 +15,7 @@
 </svelte:head>
 
 {#if busy}
-	<div class="fixed inset-x-0 top-0 z-[100] h-0.5 bg-brand-100" role="presentation">
+	<div class="fixed inset-x-0 top-0 z-100 h-0.5 bg-brand-100" role="presentation">
 		<div class="nav-progress h-full bg-brand-600"></div>
 	</div>
 {/if}

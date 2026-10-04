@@ -4,6 +4,7 @@
 	import type { LayoutProps } from './$types';
 	import { locales, setLocale } from '$lib/paraglide/runtime';
 	import * as m from '$lib/paraglide/messages.js';
+	import WhatsAppIcon from '$lib/components/icons/whatsapp-icon.svelte';
 	import { jsonLdScript } from '$lib/utils/jsonld';
 
 	let { data, children }: LayoutProps = $props();
@@ -93,7 +94,11 @@
 		<header class="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
 			<div class="container-page flex h-16 items-center justify-between gap-4">
 				<a href="/" class="flex items-center gap-2">
-					<img src="/brand/MC_Logo_Dark.png" alt="Melles Cleaning Logo" class="h-8 relative bottom-1">
+					<img
+						src="/brand/MC_Logo_Dark.png"
+						alt="Melles Cleaning Logo"
+						class="relative bottom-1 h-8"
+					/>
 					<span class="text-base font-semibold tracking-tight text-foreground"
 						>{settings.businessName}</span
 					>
@@ -136,14 +141,18 @@
 					{#if whatsappHref}
 						<a
 							href={whatsappHref}
-							class="hidden rounded-brand border border-border px-3 py-2 text-sm font-medium text-foreground transition hover:border-brand-500 hover:text-brand-700 lg:inline-block"
+							aria-label={m.cta_whatsapp()}
+							class="hidden items-center gap-2 rounded-brand bg-whatsapp px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-whatsapp-dark sm:inline-flex"
 							rel="noopener noreferrer"
-							target="_blank">{m.cta_whatsapp()}</a
+							target="_blank"
 						>
+							<WhatsAppIcon class="h-4 w-4 shrink-0" />
+							<span class="hidden lg:inline">{m.cta_whatsapp()}</span>
+						</a>
 					{/if}
 					<a
 						href="/book"
-						class="rounded-brand bg-accent-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700"
+						class="rounded-brand bg-accent-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-accent-700"
 						>{m.cta_quote()}</a
 					>
 				</div>
@@ -188,11 +197,14 @@
 						{#if whatsappHref}
 							<li>
 								<a
-									class="hover:text-white"
+									class="inline-flex items-center gap-1.5 hover:text-white"
 									href={whatsappHref}
 									rel="noopener noreferrer"
-									target="_blank">{m.cta_whatsapp_us()}</a
+									target="_blank"
 								>
+									<WhatsAppIcon class="h-3.5 w-3.5 shrink-0 text-whatsapp" />
+									{m.cta_whatsapp_us()}
+								</a>
 							</li>
 						{/if}
 						{#if settings.email}

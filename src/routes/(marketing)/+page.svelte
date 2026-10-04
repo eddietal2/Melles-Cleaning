@@ -53,7 +53,7 @@
 				event cleanup.
 			</p>
 		</div>
-		<a href="/services" class="text-sm font-medium text-brand-700 hover:underline"
+		<a href="/services" class="text-sm font-medium text-accent-700 hover:underline"
 			>View all services →</a
 		>
 	</div>
@@ -93,7 +93,7 @@
 
 				<a
 					href="/services/{service.slug}"
-					class="mt-5 inline-block text-sm font-medium text-brand-700 hover:underline"
+					class="mt-5 inline-block text-sm font-medium text-accent-700 hover:underline"
 					>Learn more →</a
 				>
 			</article>

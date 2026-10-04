@@ -34,6 +34,11 @@
 	--color-accent-900: #8a2000;
 	--color-accent-950: #661800;
 
+	/* WhatsApp brand green — a third-party brand colour, kept separate from the scales above */
+	--color-whatsapp: #25d366;
+	--color-whatsapp-dark: #1da851;
+	--color-whatsapp-darker: #128c7e;
+
 	/* Semantic surface and text tokens */
 	--color-background: #ffffff;
 	--color-surface: #f8fafc;
