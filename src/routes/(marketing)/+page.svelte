@@ -63,9 +63,9 @@
 					>Request a quote</a
 				>
 				<a
-					href="/pricing"
+					href="/services"
 					class="rounded-brand border border-border-strong px-5 py-3 text-sm font-semibold text-foreground transition hover:border-brand-500 hover:text-brand-700"
-					>See pricing</a
+					>Browse services</a
 				>
 			</div>
 		</div>

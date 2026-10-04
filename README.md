@@ -134,8 +134,7 @@ immediately without a rebuild.
 | Route                              | Purpose                                       |
 | ---------------------------------- | --------------------------------------------- |
 | `/`                                | Home with services, pricing and promotions    |
-| `/services` and `/services/[slug]` | Service catalogue and detail pages            |
-| `/pricing`                         | Full pricing catalogue grouped by service     |
+| `/services` and `/services/[slug]` | Service catalogue, detail pages and pricing   |
 | `/gallery`                         | Published gallery images                      |
 | `/about`                           | Company story and the 20-point checklist      |
 | `/contact`                         | General enquiry form                          |

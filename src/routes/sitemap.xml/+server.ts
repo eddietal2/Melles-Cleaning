@@ -2,7 +2,7 @@ import { PUBLIC_SITE_URL } from '$app/env/public';
 import type { RequestHandler } from './$types';
 import { getServices } from '$lib/server/content/site';
 
-const STATIC_PATHS = ['/', '/services', '/pricing', '/gallery', '/about', '/contact', '/book'];
+const STATIC_PATHS = ['/', '/services', '/gallery', '/about', '/contact', '/book'];
 
 export const GET: RequestHandler = async () => {
 	const base = PUBLIC_SITE_URL.replace(/\/$/, '');

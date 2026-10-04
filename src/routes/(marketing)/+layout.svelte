@@ -41,7 +41,6 @@
 	const nav = [
 		{ href: '/', label: m.nav_home },
 		{ href: '/services', label: m.nav_services },
-		{ href: '/pricing', label: m.nav_pricing },
 		{ href: '/gallery', label: m.nav_gallery },
 		{ href: '/about', label: m.nav_about },
 		{ href: '/contact', label: m.nav_contact }
@@ -157,7 +156,6 @@
 			<div>
 				<p class="text-sm font-semibold text-white">{m.footer_company()}</p>
 				<ul class="mt-3 space-y-2 text-sm">
-					<li><a class="hover:text-white" href="/pricing">{m.nav_pricing()}</a></li>
 					<li><a class="hover:text-white" href="/gallery">{m.nav_gallery()}</a></li>
 					<li><a class="hover:text-white" href="/about">{m.nav_about()}</a></li>
 					<li><a class="hover:text-white" href="/contact">{m.nav_contact()}</a></li>
