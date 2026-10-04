@@ -4,34 +4,35 @@
 
 /*
  * Melles Cleaning Services — Design Tokens
- * Brand direction: fresh, trustworthy, clean. Teal primary (water/freshness),
- * warm amber accent (action/energy), deep slate ink for legibility.
+ * Brand direction: fresh, trustworthy, clean. Cyan primary (#00C3FE — freshness and
+ * water) with a vivid orange secondary (#FE3B00 — action and energy) on deep slate ink.
  */
 @theme {
-	/* Brand — teal */
-	--color-brand-50: #f0fdfa;
-	--color-brand-100: #ccfbf1;
-	--color-brand-200: #99f6e4;
-	--color-brand-300: #5eead4;
-	--color-brand-400: #2dd4bf;
-	--color-brand-500: #14b8a6;
-	--color-brand-600: #0d9488;
-	--color-brand-700: #0f766e;
-	--color-brand-800: #115e59;
-	--color-brand-900: #134e4a;
-	--color-brand-950: #042f2e;
+	/* Brand — primary cyan (#00C3FE anchors the 600 action shade) */
+	--color-brand-50: #f0fbff;
+	--color-brand-100: #dbf7ff;
+	--color-brand-200: #b4edfe;
+	--color-brand-300: #7edefc;
+	--color-brand-400: #41d0fb;
+	--color-brand-500: #1ac9ff;
+	--color-brand-600: #00c3fe;
+	--color-brand-700: #00a4d6;
+	--color-brand-800: #0085ad;
+	--color-brand-900: #006a8a;
+	--color-brand-950: #004e66;
 
-	/* Accent — amber for calls to action */
-	--color-accent-50: #fffbeb;
-	--color-accent-100: #fef3c7;
-	--color-accent-200: #fde68a;
-	--color-accent-300: #fcd34d;
-	--color-accent-400: #fbbf24;
-	--color-accent-500: #f59e0b;
-	--color-accent-600: #d97706;
-	--color-accent-700: #b45309;
-	--color-accent-800: #92400e;
-	--color-accent-900: #78350f;
+	/* Accent — secondary orange for calls to action (#FE3B00 anchors the 600 shade) */
+	--color-accent-50: #fff3f0;
+	--color-accent-100: #ffe4db;
+	--color-accent-200: #fec5b4;
+	--color-accent-300: #fc9b7e;
+	--color-accent-400: #fb6c41;
+	--color-accent-500: #ff4f1a;
+	--color-accent-600: #fe3b00;
+	--color-accent-700: #d63200;
+	--color-accent-800: #ad2800;
+	--color-accent-900: #8a2000;
+	--color-accent-950: #661800;
 
 	/* Semantic surface and text tokens */
 	--color-background: #ffffff;
@@ -42,10 +43,10 @@
 	--color-border-strong: #cbd5e1;
 	--color-foreground: #0f172a;
 	--color-muted-foreground: #64748b;
-	--color-primary: #0d9488;
+	--color-primary: #00c3fe;
 	--color-primary-foreground: #ffffff;
-	--color-accent: #f59e0b;
-	--color-accent-foreground: #1c1917;
+	--color-accent: #fe3b00;
+	--color-accent-foreground: #ffffff;
 
 	/* Status colors for CRM badges */
 	--color-success: #16a34a;

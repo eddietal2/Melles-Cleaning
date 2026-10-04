@@ -110,6 +110,9 @@ prisma/
 - **`$lib/*` imports** are aliased in both `tsconfig.json` and `vite.config.ts`; use this for
   application code.
 - **Favicons live in `static/`**, not in `src/lib/assets/`.
+- **Brand colours** are defined once in `src/routes/layout.css` under `@theme`: the primary cyan
+  `#00C3FE` as the `brand-*` scale (600 is the action shade) and the secondary orange `#FE3B00` as
+  the `accent-*` scale. Change them there and every button, link, badge and chart follows.
 - **Streamed admin data.** The CRM dashboard, reports and list `load` functions return promises
   rather than awaiting them, so the page shell renders immediately and the content streams in
   behind a [`Skeleton`](src/lib/components/ui/skeleton.svelte) / [`TableSkeleton`](src/lib/components/ui/table-skeleton.svelte)

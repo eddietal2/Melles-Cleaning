@@ -31,7 +31,7 @@
 			<div class="mt-8 flex flex-wrap gap-3">
 				<a
 					href="/contact"
-					class="rounded-brand bg-brand-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700"
+					class="rounded-brand bg-accent-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700"
 					>Request a quote</a
 				>
 				<a

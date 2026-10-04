@@ -146,7 +146,7 @@
 					{/if}
 					<a
 						href="/book"
-						class="rounded-brand bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700"
+						class="rounded-brand bg-accent-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700"
 						>{m.cta_quote()}</a
 					>
 				</div>
