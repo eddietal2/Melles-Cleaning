@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
+	import SliderGallery from '$lib/components/marketing/slider-gallery.svelte';
 	import { formatTzsRange } from '$lib/utils/currency';
 
 	let { data }: PageProps = $props();
@@ -101,6 +102,8 @@
 		{/each}
 	</div>
 </section>
+
+<SliderGallery title="Recent work" subtitle="A look at the homes and offices we care for." />
 
 <section class="border-y border-border bg-surface">
 	<div class="container-page py-16 lg:py-20">
