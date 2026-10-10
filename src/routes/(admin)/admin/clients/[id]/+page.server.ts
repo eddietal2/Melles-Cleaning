@@ -7,7 +7,8 @@ import {
 	addClientContact,
 	deleteClientContact,
 	getClient,
-	updateClient
+	updateClient,
+	updateClientContact
 } from '$lib/server/crm/clients';
 import { findPortalUserForClient, inviteClientToPortal } from '$lib/server/portal/access';
 
@@ -54,6 +55,23 @@ export const actions: Actions = {
 		}
 
 		await addClientContact(params.id, parsed.data);
+		return { success: true };
+	},
+
+	updateContact: async ({ request, params }) => {
+		const data = formDataToObject(await request.formData());
+		const id = String(data.id ?? '');
+		const parsed = clientContactSchema.safeParse(data);
+
+		if (!parsed.success) {
+			return fail(400, { contactErrors: fieldErrors(parsed.error) });
+		}
+
+		const updated = await updateClientContact(params.id, id, parsed.data);
+		if (!updated) {
+			return fail(404, { contactErrors: { name: 'Contact not found.' } });
+		}
+
 		return { success: true };
 	},
 

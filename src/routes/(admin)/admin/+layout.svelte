@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import type { LayoutProps } from './$types';
+	import Toaster from '$lib/components/ui/toaster.svelte';
 
 	let { data, children }: LayoutProps = $props();
 
 	const nav = [
-		{ href: '/admin', label: 'Dashboard' },		
+		{ href: '/admin', label: 'Dashboard' },
 		{ href: '/admin/website', label: 'Website' },
 		{ href: '/admin/clients', label: 'Clients' },
 		{ href: '/admin/bookings', label: 'Bookings' },
@@ -101,3 +102,5 @@
 		</main>
 	</div>
 </div>
+
+<Toaster />

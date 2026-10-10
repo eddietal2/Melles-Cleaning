@@ -37,6 +37,7 @@ export async function createClient(input: ClientInput) {
 		data: {
 			displayName: input.displayName,
 			clientType: input.clientType,
+			status: input.status,
 			addressLine: input.addressLine ?? null,
 			area: input.area ?? null,
 			city: input.city,
@@ -51,6 +52,7 @@ export async function updateClient(id: string, input: ClientInput) {
 		data: {
 			displayName: input.displayName,
 			clientType: input.clientType,
+			status: input.status,
 			addressLine: input.addressLine ?? null,
 			area: input.area ?? null,
 			city: input.city,
@@ -73,6 +75,21 @@ export async function addClientContact(clientId: string, input: ClientContactInp
 			isPrimary: existing === 0
 		}
 	});
+}
+
+/** Updates an existing contact, scoped to its client so ids cannot be tampered with. */
+export async function updateClientContact(clientId: string, id: string, input: ClientContactInput) {
+	const { count } = await db.clientContact.updateMany({
+		where: { id, clientId },
+		data: {
+			name: input.name,
+			role: input.role ?? null,
+			phone: input.phone,
+			email: input.email ?? null
+		}
+	});
+
+	return count > 0;
 }
 
 export async function deleteClientContact(id: string) {
