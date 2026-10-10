@@ -2,6 +2,9 @@
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
 
+/* Class-based dark mode: `.dark` on <html> activates the dark token overrides below. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /*
  * Melles Cleaning Services — Design Tokens
  * Brand direction: fresh, trustworthy, clean. Cyan primary (#00C3FE — freshness and
@@ -79,6 +82,27 @@
 	--shadow-overlay: 0 20px 25px -5px rgb(15 23 42 / 0.12), 0 8px 10px -6px rgb(15 23 42 / 0.08);
 }
 
+/*
+	* Dark theme overrides. Redefining the semantic tokens here re-themes every
+	* `bg-background`, `text-foreground`, `border-border`, and so on across the app.
+	*/
+.dark {
+	--color-background: #0f172a;
+	--color-surface: #0b1120;
+	--color-surface-muted: #1e293b;
+	--color-surface-inverse: #f8fafc;
+	--color-border: #1e293b;
+	--color-border-strong: #334155;
+	--color-foreground: #e2e8f0;
+	--color-muted-foreground: #94a3b8;
+
+	/* Brand tints used by chips and the active nav need dark-friendly values. */
+	--color-brand-50: #082031;
+	--color-brand-100: #0c2f45;
+	--color-brand-700: #41d0fb;
+	--color-brand-800: #7edefc;
+}
+
 @layer base {
 	html {
 		-webkit-text-size-adjust: 100%;
@@ -91,6 +115,12 @@
 		font-family: var(--font-sans);
 		-webkit-font-smoothing: antialiased;
 		text-rendering: optimizeLegibility;
+	}
+
+	/* The forms plugin paints inputs white; keep them readable in dark mode. */
+	.dark :where(input, select, textarea) {
+		background-color: var(--color-surface-muted);
+		color: var(--color-foreground);
 	}
 
 	:focus-visible {

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import type { LayoutProps } from './$types';
+	import ThemeToggle from '$lib/components/ui/theme-toggle.svelte';
 	import Toaster from '$lib/components/ui/toaster.svelte';
 
 	let { data, children }: LayoutProps = $props();
@@ -46,7 +47,11 @@
 <div class="flex h-dvh overflow-hidden bg-surface">
 	<aside class="hidden h-full w-60 shrink-0 flex-col border-r border-border bg-background lg:flex">
 		<div class="flex h-16 items-center gap-2 border-b border-border px-5">
-			<img src="/brand/MC_Logo_Dark.png" alt="Melles Cleaning Logo" class="relative bottom-1 h-8" />
+			<img
+				src="/brand/MC_Logo_Dark.png"
+				alt="Melles Cleaning Logo"
+				class="relative bottom-1 h-8 dark:invert"
+			/>
 		</div>
 
 		<nav class="flex-1 space-y-1 overflow-y-auto p-3" aria-label="Admin">
@@ -78,6 +83,7 @@
 		>
 			<p class="text-sm font-semibold text-foreground lg:hidden">Melles CRM</p>
 			<div class="ml-auto flex items-center gap-3">
+				<ThemeToggle />
 				<div class="text-right">
 					<p class="text-sm font-medium text-foreground">{data.user.name}</p>
 					<p class="text-xs text-muted-foreground">{data.user.role}</p>
