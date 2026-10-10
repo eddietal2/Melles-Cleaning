@@ -18,9 +18,13 @@ export const quoteSchema = z.object({
 export type QuoteInput = z.infer<typeof quoteSchema>;
 export type QuoteLineItemInput = z.infer<typeof quoteLineItemSchema>;
 
+/** The most line items a single quote may contain. */
+export const MAX_QUOTE_LINE_ITEMS = 10;
+
 /**
  * Reads parallel `description[]`, `quantity[]` and `unitPriceTzs[]` fields from a
- * quote line-item builder form and returns only rows with a description.
+ * quote line-item builder form and returns only rows with a description, capped at
+ * {@link MAX_QUOTE_LINE_ITEMS}.
  */
 export function readLineItems(data: FormData): QuoteLineItemInput[] {
 	const descriptions = data.getAll('description').map(String);
@@ -36,5 +40,6 @@ export function readLineItems(data: FormData): QuoteLineItemInput[] {
 			})
 		)
 		.filter((result): result is { success: true; data: QuoteLineItemInput } => result.success)
-		.map((result) => result.data);
+		.map((result) => result.data)
+		.slice(0, MAX_QUOTE_LINE_ITEMS);
 }

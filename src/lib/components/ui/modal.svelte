@@ -89,7 +89,7 @@
 				{/if}
 			</div>
 			<div
-				class="overflow-y-auto border-t border-border bg-surface-muted p-5 lg:border-t-0 lg:border-l"
+				class="min-h-0 overflow-hidden border-t border-border bg-surface-muted p-5 lg:border-t-0 lg:border-l"
 			>
 				{@render preview()}
 			</div>
