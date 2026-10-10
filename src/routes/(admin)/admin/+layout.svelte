@@ -3,6 +3,7 @@
 	import type { LayoutProps } from './$types';
 	import ThemeToggle from '$lib/components/ui/theme-toggle.svelte';
 	import Toaster from '$lib/components/ui/toaster.svelte';
+	import { pageTitle } from '$lib/utils/page-title';
 
 	let { data, children }: LayoutProps = $props();
 
@@ -40,7 +41,7 @@
 </script>
 
 <svelte:head>
-	<title>Admin · Melles Cleaning Services</title>
+	<title>{$pageTitle ?? 'Admin · Melles Cleaning Services'}</title>
 	<meta name="robots" content="noindex" />
 </svelte:head>
 

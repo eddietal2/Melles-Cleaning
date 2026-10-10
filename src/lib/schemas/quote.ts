@@ -18,6 +18,15 @@ export const quoteSchema = z.object({
 export type QuoteInput = z.infer<typeof quoteSchema>;
 export type QuoteLineItemInput = z.infer<typeof quoteLineItemSchema>;
 
+/** A line-item row as edited in the quote forms, including its local accordion state. */
+export type QuoteItemRow = {
+	id: number;
+	description: string;
+	quantity: number;
+	unitPriceTzs: number;
+	open: boolean;
+};
+
 /** The most line items a single quote may contain. */
 export const MAX_QUOTE_LINE_ITEMS = 10;
 

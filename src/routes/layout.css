@@ -194,3 +194,46 @@
 		padding-inline: 2rem;
 	}
 }
+
+/* The printed/saved PDF should be a single A4 page with no browser margins. */
+@page {
+	size: A4;
+	margin: 0;
+}
+
+/*
+ * Print: isolate the quote document so the browser's "Save as PDF" reproduces the
+ * on-screen preview exactly — same styling and background colours — at 100% zoom,
+ * without the surrounding CRM chrome.
+ */
+@media print {
+	body {
+		margin: 0;
+		background: #fff;
+	}
+
+	body * {
+		visibility: hidden;
+	}
+
+	.quote-document,
+	.quote-document * {
+		visibility: visible;
+	}
+
+	.quote-document {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 210mm;
+		min-height: 297mm;
+		margin: 0;
+		box-shadow: none;
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
+	}
+
+	.quote-preview-zoom {
+		zoom: 1 !important;
+	}
+}

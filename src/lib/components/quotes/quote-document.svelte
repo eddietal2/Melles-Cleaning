@@ -15,25 +15,28 @@
 	 * regardless of the app theme.
 	 */
 	let {
-		quoteNumber = 'DRAFT',
 		issuedAt = new Date(),
 		clientName = 'Select a client',
 		items = [],
+		discountTzs = 0,
 		terms = 'All rates quoted are valid for 15 days.\n40% payment should be done in advance.\nThe remaining amount should be paid within 20 days of delivery.'
 	}: {
-		quoteNumber?: string;
 		issuedAt?: Date | string;
 		clientName?: string;
 		items?: QuoteDocumentItem[];
+		discountTzs?: number;
 		terms?: string;
 	} = $props();
 
 	const subtotal = $derived(
 		items.reduce((sum, item) => sum + item.quantity * item.unitPriceTzs, 0)
 	);
+	const total = $derived(Math.max(0, subtotal - discountTzs));
 </script>
 
-<div class="mx-auto min-h-[297mm] w-[210mm] rounded-2xl bg-white p-10 text-slate-900 shadow-xl">
+<div
+	class="quote-document mx-auto min-h-[297mm] w-[210mm] rounded-2xl bg-white p-10 text-slate-900 shadow-xl"
+>
 	<div class="flex items-start justify-between gap-4">
 		<div class="flex items-center gap-2.5">
 			<img src="/brand/MC_Logo_Dark.png" alt="" class="h-9" />
@@ -44,7 +47,6 @@
 		</div>
 		<div class="text-right">
 			<p class="text-2xl font-bold tracking-tight text-brand-600">QUOTE</p>
-			<p class="text-xs text-slate-500">{quoteNumber}</p>
 		</div>
 	</div>
 
@@ -94,9 +96,15 @@
 				<span>Sub total</span>
 				<span>{formatTzs(subtotal)}</span>
 			</div>
+			{#if discountTzs > 0}
+				<div class="flex items-center justify-between text-sm text-slate-500">
+					<span>Discount</span>
+					<span>− {formatTzs(discountTzs)}</span>
+				</div>
+			{/if}
 			<div class="flex items-center justify-between rounded-xl bg-slate-900 px-3 py-2 text-white">
 				<span class="text-xs font-semibold tracking-wider uppercase">Grand total</span>
-				<span class="text-sm font-bold">{formatTzs(subtotal)}</span>
+				<span class="text-sm font-bold">{formatTzs(total)}</span>
 			</div>
 		</div>
 	</div>
