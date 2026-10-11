@@ -31,6 +31,8 @@ export async function getQuote(id: string) {
 
 function lineItemData(items: QuoteLineItemInput[]) {
 	return items.map((item, index) => ({
+		title: item.title,
+		cleaningType: item.cleaningType,
 		description: item.description,
 		quantity: item.quantity,
 		unitPriceTzs: item.unitPriceTzs,

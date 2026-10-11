@@ -8,7 +8,12 @@
 	import Modal from '$lib/components/ui/modal.svelte';
 	import Spinner from '$lib/components/ui/spinner.svelte';
 	import TableSkeleton from '$lib/components/ui/table-skeleton.svelte';
-	import type { QuoteItemRow } from '$lib/schemas/quote';
+	import {
+		DEFAULT_QUOTE_TERMS,
+		type QuoteDocumentLang,
+		type QuoteItemRow,
+		type QuoteTerms
+	} from '$lib/schemas/quote';
 	import { formatTzs } from '$lib/utils/currency';
 	import { formatDate } from '$lib/utils/dates';
 	import { toast } from '$lib/utils/toast';
@@ -19,6 +24,27 @@
 
 	/** The new-quote modal is opened from the header action. */
 	let showForm = $state(false);
+
+	/** Whether the New quote modal shows the document preview full-width. */
+	let previewOnly = $state(false);
+
+	/** Zoom of the modal's document preview; snapped to 100% while expanded. */
+	let previewZoom = $state(0.6);
+
+	/** The zoom to restore when leaving full-preview mode. */
+	let zoomBeforeFull = 0.6;
+
+	/** Toggle full-preview mode, snapping the preview to 100% while expanded. */
+	function toggleFullPreview() {
+		if (previewOnly) {
+			previewOnly = false;
+			previewZoom = zoomBeforeFull;
+		} else {
+			zoomBeforeFull = previewZoom;
+			previewOnly = true;
+			previewZoom = 1;
+		}
+	}
 
 	/** The client chosen in the form, mirrored into the live document preview. */
 	let selectedClientId = $state('');
@@ -38,17 +64,36 @@
 	/** True while the quote deletion request is in flight. */
 	let deletingQuote = $state(false);
 
-	/** Terms shown in the document footer; edited via the Terms & Conditions modal. */
-	let terms = $state(
-		'All rates quoted are valid for 15 days.\n40% payment should be done in advance.\nThe remaining amount should be paid within 20 days of delivery.'
-	);
+	/**
+	 * Terms shown in the document footer, authored per language and edited via the
+	 * Terms & Conditions modal. A copy of the defaults is used so live edits don't
+	 * mutate the shared constant.
+	 */
+	let terms = $state<QuoteTerms>({ ...DEFAULT_QUOTE_TERMS });
+
+	/** Which language's terms the modal is currently editing. */
+	let termsLang = $state<QuoteDocumentLang>('en');
+
+	/** Language options for the terms editor. */
+	const termsLanguages: { value: QuoteDocumentLang; label: string }[] = [
+		{ value: 'en', label: 'English' },
+		{ value: 'sw', label: 'Kiswahili' }
+	];
 
 	/** Maximum length of the free-text terms shown on the document. */
 	const TERMS_MAX = 1000;
 
 	/** The line items listed in the "Items" accordion of the new-quote form. */
 	let items = $state<QuoteItemRow[]>([
-		{ id: 0, description: '', quantity: 1, unitPriceTzs: 0, open: true }
+		{
+			id: 0,
+			title: '',
+			cleaningType: '',
+			description: '',
+			quantity: 1,
+			unitPriceTzs: 0,
+			open: true
+		}
 	]);
 </script>
 
@@ -71,7 +116,11 @@
 			<button
 				type="button"
 				class="inline-flex shrink-0 items-center gap-2 rounded-brand bg-accent-600 px-4 py-2 text-sm font-semibold text-white shadow-card transition hover:bg-accent-700"
-				onclick={() => (showForm = true)}
+				onclick={() => {
+					showForm = true;
+					previewOnly = false;
+					previewZoom = 0.6;
+				}}
 			>
 				Add quote
 			</button>
@@ -80,21 +129,41 @@
 
 	<Modal open={showTerms} title="Terms & Conditions" onclose={() => (showTerms = false)}>
 		<div class="space-y-2">
+			<div
+				class="flex w-fit items-center rounded-pill border border-border bg-surface-muted p-0.5 text-xs"
+				role="group"
+				aria-label="Terms language"
+			>
+				{#each termsLanguages as option (option.value)}
+					<button
+						type="button"
+						class="rounded-pill px-3 py-1 font-medium transition {termsLang === option.value
+							? 'bg-brand-600 text-white shadow-sm'
+							: 'text-muted-foreground hover:text-foreground'}"
+						aria-pressed={termsLang === option.value}
+						onclick={() => (termsLang = option.value)}
+					>
+						{option.label}
+					</button>
+				{/each}
+			</div>
 			<div class="flex items-center justify-between">
-				<label for="terms" class="block text-sm font-medium text-foreground"
-					>Terms & conditions</label
-				>
-				<span class="text-xs text-muted-foreground">{terms.length}/{TERMS_MAX}</span>
+				<label for="terms" class="block text-sm font-medium text-foreground">
+					Terms & conditions ({termsLang === 'en' ? 'English' : 'Kiswahili'})
+				</label>
+				<span class="text-xs text-muted-foreground">{terms[termsLang].length}/{TERMS_MAX}</span>
 			</div>
 			<textarea
 				id="terms"
-				bind:value={terms}
+				bind:value={terms[termsLang]}
 				rows="8"
 				maxlength={TERMS_MAX}
 				placeholder="All rates quoted are valid for 15 days."
 				class="block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 			></textarea>
-			<p class="text-xs text-muted-foreground">Shown in the footer of the quote document.</p>
+			<p class="text-xs text-muted-foreground">
+				Shown in the footer of the quote document. Each language keeps its own text.
+			</p>
 		</div>
 		{#snippet footer()}
 			<div class="flex justify-end">
@@ -112,13 +181,31 @@
 	{#await data.streamed}
 		<TableSkeleton rows={6} columns={5} />
 	{:then payload}
-		<Modal open={showForm} title="New quote" size="xl" tall onclose={() => (showForm = false)}>
+		<Modal
+			open={showForm}
+			title="New quote"
+			size="xl"
+			tall
+			{previewOnly}
+			onclose={() => (showForm = false)}
+		>
+			{#snippet headerActions()}
+				<button
+					type="button"
+					class="rounded-brand border border-border px-3 py-1.5 text-xs font-medium text-foreground transition hover:bg-surface-muted"
+					aria-pressed={previewOnly}
+					onclick={toggleFullPreview}
+				>
+					{previewOnly ? 'Exit full preview' : 'Full preview'}
+				</button>
+			{/snippet}
 			{#snippet preview()}
 				{@const selectedClient = payload.clients.find((client) => client.id === selectedClientId)}
 				<QuotePreview
-					clientName={selectedClient?.displayName ?? 'Select a client'}
+					clientName={selectedClient?.displayName ?? ''}
 					{items}
 					{terms}
+					bind:zoom={previewZoom}
 				/>
 			{/snippet}
 			{#snippet footer()}
@@ -178,7 +265,7 @@
 					{#if errors.clientId}<p class="mt-1 text-xs text-danger">{errors.clientId}</p>{/if}
 				</div>
 
-				<QuoteItemsEditor bind:items />
+				<QuoteItemsEditor bind:items sticky />
 
 				<button
 					type="button"

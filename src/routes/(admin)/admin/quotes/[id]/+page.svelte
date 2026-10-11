@@ -2,13 +2,18 @@
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import type { PageProps } from './$types';
 	import QuoteItemsEditor from '$lib/components/quotes/quote-items-editor.svelte';
 	import QuotePreview from '$lib/components/quotes/quote-preview.svelte';
 	import ConfirmDialog from '$lib/components/ui/confirm-dialog.svelte';
 	import Spinner from '$lib/components/ui/spinner.svelte';
-	import type { QuoteItemRow } from '$lib/schemas/quote';
+	import {
+		DEFAULT_QUOTE_TERMS,
+		type QuoteDocumentLang,
+		type QuoteItemRow,
+		type QuoteTerms
+	} from '$lib/schemas/quote';
 	import { formatTzs } from '$lib/utils/currency';
 	import { formatDateTime, toDateInputValue } from '$lib/utils/dates';
 	import { pageTitle } from '$lib/utils/page-title';
@@ -44,12 +49,24 @@
 		data.quote.lineItems.length > 0
 			? data.quote.lineItems.map((line, index) => ({
 					id: index,
+					title: line.title,
+					cleaningType: line.cleaningType,
 					description: line.description,
 					quantity: line.quantity,
 					unitPriceTzs: line.unitPriceTzs,
 					open: true
 				}))
-			: [{ id: 0, description: '', quantity: 1, unitPriceTzs: 0, open: true }]
+			: [
+					{
+						id: 0,
+						title: '',
+						cleaningType: '',
+						description: '',
+						quantity: 1,
+						unitPriceTzs: 0,
+						open: true
+					}
+				]
 	);
 
 	/** Discount in TZS, mirrored into the live document preview. */
@@ -65,11 +82,49 @@
 			data.quote.client.displayName
 	);
 
+	/** The language the previewed document is rendered and downloaded in. */
+	let lang = $state<QuoteDocumentLang>('en');
+
+	/**
+	 * Terms shown in the document footer, per language. Quotes don't persist their
+	 * terms yet, so the document renders the defaults for the selected language.
+	 */
+	let terms = $state<QuoteTerms>({ ...DEFAULT_QUOTE_TERMS });
+
 	/** True while the PDF is being generated. */
 	let downloading = $state(false);
 
+	/** Whether the download-language menu is open. */
+	let downloadOpen = $state(false);
+
+	/** The download menu wrapper, used to close it on an outside click. */
+	let downloadMenu = $state<HTMLElement | null>(null);
+
+	/** Language options offered by the download menu. */
+	const downloadLanguages: { value: QuoteDocumentLang; label: string; hint: string }[] = [
+		{ value: 'en', label: 'English', hint: 'English document' },
+		{ value: 'sw', label: 'Kiswahili', hint: 'Swahili document' }
+	];
+
+	// Close the download menu when clicking anywhere outside it.
+	$effect(() => {
+		if (!downloadOpen) return;
+		function onPointerDown(event: MouseEvent) {
+			if (downloadMenu && !downloadMenu.contains(event.target as Node)) {
+				downloadOpen = false;
+			}
+		}
+		document.addEventListener('mousedown', onPointerDown);
+		return () => document.removeEventListener('mousedown', onPointerDown);
+	});
+
 	/** Render the on-screen document to a real, downloadable PDF file. */
-	async function downloadPdf() {
+	async function downloadPdf(targetLang: QuoteDocumentLang = lang) {
+		// Switch the preview to the requested language and let the DOM update so
+		// the captured document matches the chosen language.
+		lang = targetLang;
+		await tick();
+
 		const element = document.querySelector<HTMLElement>('.quote-document');
 		if (!element) return;
 
@@ -108,11 +163,17 @@
 				}
 			}
 
-			pdf.save(`${data.quote.quoteNumber}.pdf`);
+			pdf.save(`${data.quote.quoteNumber}-${targetLang}.pdf`);
 		} finally {
 			downloading = false;
 			if (zoomHost) zoomHost.style.zoom = previousZoom;
 		}
+	}
+
+	/** Download in the chosen language and close the menu. */
+	function downloadIn(targetLang: QuoteDocumentLang) {
+		downloadOpen = false;
+		return downloadPdf(targetLang);
 	}
 
 	onMount(() => {
@@ -121,7 +182,7 @@
 
 		// The quotes list "Download" action links here with ?print=1.
 		if (page.url.searchParams.get('print') === '1') {
-			setTimeout(downloadPdf, 600);
+			setTimeout(() => downloadPdf('en'), 600);
 		}
 
 		return () => pageTitle.set(null);
@@ -143,17 +204,36 @@
 			</p>
 		</div>
 		<div class="flex shrink-0 items-center gap-2">
-			<button
-				type="button"
-				disabled={downloading}
-				class="inline-flex shrink-0 items-center gap-2 rounded-brand bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-card transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-70"
-				onclick={downloadPdf}
-			>
-				{#if downloading}
-					<Spinner class="h-4 w-4" />
-				{:else}
+			<div class="relative" bind:this={downloadMenu}>
+				<button
+					type="button"
+					disabled={downloading}
+					aria-haspopup="menu"
+					aria-expanded={downloadOpen}
+					class="inline-flex shrink-0 items-center gap-2 rounded-brand bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-card transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-70"
+					onclick={() => (downloadOpen = !downloadOpen)}
+				>
+					{#if downloading}
+						<Spinner class="h-4 w-4" />
+					{:else}
+						<svg
+							class="h-4 w-4"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							aria-hidden="true"
+						>
+							<path d="M12 3v12" />
+							<path d="m7 10 5 5 5-5" />
+							<path d="M5 21h14" />
+						</svg>
+					{/if}
+					Download
 					<svg
-						class="h-4 w-4"
+						class="h-4 w-4 opacity-80"
 						viewBox="0 0 24 24"
 						fill="none"
 						stroke="currentColor"
@@ -162,13 +242,34 @@
 						stroke-linejoin="round"
 						aria-hidden="true"
 					>
-						<path d="M12 3v12" />
-						<path d="m7 10 5 5 5-5" />
-						<path d="M5 21h14" />
+						<path d="m6 9 6 6 6-6" />
 					</svg>
+				</button>
+				{#if downloadOpen}
+					<div
+						class="absolute right-0 z-20 mt-1 w-48 rounded-brand border border-border bg-background p-1 shadow-overlay"
+						role="menu"
+					>
+						<p
+							class="px-3 py-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase"
+						>
+							Download as
+						</p>
+						{#each downloadLanguages as option (option.value)}
+							<button
+								type="button"
+								role="menuitem"
+								title={option.hint}
+								class="flex w-full items-center justify-between gap-2 rounded-brand px-3 py-2 text-left text-sm text-foreground transition hover:bg-surface-muted"
+								onclick={() => downloadIn(option.value)}
+							>
+								<span>{option.label}</span>
+								<span class="text-xs text-muted-foreground">PDF</span>
+							</button>
+						{/each}
+					</div>
 				{/if}
-				Download
-			</button>
+			</div>
 			<button
 				type="button"
 				class="rounded-brand border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:border-danger hover:text-danger"
@@ -381,7 +482,14 @@
 			<div
 				class="rounded-brand border border-border bg-surface-muted p-4 shadow-card lg:sticky lg:top-6 lg:h-[calc(100vh-7rem)]"
 			>
-				<QuotePreview clientName={selectedClientName} {items} {discountTzs} initialZoom={0.8} />
+				<QuotePreview
+					clientName={selectedClientName}
+					{items}
+					{discountTzs}
+					{terms}
+					bind:lang
+					initialZoom={0.8}
+				/>
 			</div>
 		</section>
 	</div>

@@ -16,19 +16,25 @@
 		title = '',
 		size = 'sm',
 		tall = false,
+		previewOnly = false,
 		onclose,
 		children,
 		preview,
-		footer
+		footer,
+		headerActions
 	}: {
 		open?: boolean;
 		title?: string;
 		size?: Size;
 		tall?: boolean;
+		/** Expand the `preview` pane to fill the dialog, hiding the main column. */
+		previewOnly?: boolean;
 		onclose?: () => void;
 		children?: Snippet;
 		preview?: Snippet;
 		footer?: Snippet;
+		/** Optional controls rendered in the header, before the close button. */
+		headerActions?: Snippet;
 	} = $props();
 
 	const widths: Record<Size, string> = {
@@ -67,33 +73,42 @@
 >
 	<header class="flex shrink-0 items-center justify-between gap-4 border-b border-border px-5 py-4">
 		<h2 class="text-base font-semibold text-foreground">{title}</h2>
-		<button
-			type="button"
-			class="text-muted-foreground transition hover:text-foreground"
-			aria-label="Close dialog"
-			onclick={() => onclose?.()}
-		>
-			✕
-		</button>
+		<div class="flex items-center gap-3">
+			{@render headerActions?.()}
+			<button
+				type="button"
+				class="text-muted-foreground transition hover:text-foreground"
+				aria-label="Close dialog"
+				onclick={() => onclose?.()}
+			>
+				✕
+			</button>
+		</div>
 	</header>
 	{#if preview}
-		<div class="grid min-h-0 flex-1 lg:grid-cols-2">
-			<div class="flex min-h-0 flex-col">
-				<div class="min-h-0 flex-1 overflow-y-auto p-5">
-					{@render children?.()}
-				</div>
-				{#if footer}
-					<div class="shrink-0 border-t border-border p-5">
-						{@render footer()}
-					</div>
-				{/if}
-			</div>
-			<div
-				class="min-h-0 overflow-hidden border-t border-border bg-surface-muted p-5 lg:border-t-0 lg:border-l"
-			>
+		{#if previewOnly}
+			<div class="min-h-0 flex-1 overflow-hidden bg-surface-muted p-5">
 				{@render preview()}
 			</div>
-		</div>
+		{:else}
+			<div class="grid min-h-0 flex-1 lg:grid-cols-2">
+				<div class="flex min-h-0 flex-col">
+					<div class="min-h-0 flex-1 overflow-y-auto p-5">
+						{@render children?.()}
+					</div>
+					{#if footer}
+						<div class="shrink-0 border-t border-border p-5">
+							{@render footer()}
+						</div>
+					{/if}
+				</div>
+				<div
+					class="min-h-0 overflow-hidden border-t border-border bg-surface-muted p-5 lg:border-t-0 lg:border-l"
+				>
+					{@render preview()}
+				</div>
+			</div>
+		{/if}
 	{:else}
 		<div class="flex min-h-0 flex-1 flex-col">
 			<div class="min-h-0 flex-1 overflow-y-auto p-5">

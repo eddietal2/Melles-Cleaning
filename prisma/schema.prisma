@@ -442,6 +442,8 @@ model Quote {
 model QuoteLineItem {
   id           String @id @default(cuid())
   quoteId      String
+  title        String @default("")
+  cleaningType String @default("")
   description  String
   quantity     Int    @default(1)
   unitPriceTzs Int
