@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { PageProps } from './$types';
+	import * as m from '$lib/paraglide/messages.js';
 	import { formatDateTime } from '$lib/utils/dates';
 	import TableSkeleton from '$lib/components/ui/table-skeleton.svelte';
 
@@ -11,10 +12,11 @@
 
 <div class="space-y-8">
 	<div>
-		<h1 class="text-2xl font-semibold tracking-tight text-foreground">Feedback</h1>
+		<h1 class="text-2xl font-semibold tracking-tight text-foreground">
+			{m.admin_feedback_title()}
+		</h1>
 		<p class="mt-1 text-sm text-muted-foreground">
-			Capture post-service ratings and publish approved reviews. Published feedback is surfaced on
-			the website.
+			{m.admin_feedback_intro()}
 		</p>
 	</div>
 
@@ -23,7 +25,7 @@
 	{:then payload}
 		<details class="rounded-brand border border-border bg-background shadow-card">
 			<summary class="cursor-pointer px-5 py-4 text-sm font-semibold text-foreground"
-				>Log feedback</summary
+				>{m.admin_feedback_log()}</summary
 			>
 			<form
 				method="POST"
@@ -32,14 +34,16 @@
 				use:enhance
 			>
 				<div class="sm:col-span-2">
-					<label for="bookingId" class="block text-sm font-medium text-foreground">Booking</label>
+					<label for="bookingId" class="block text-sm font-medium text-foreground"
+						>{m.common_booking()}</label
+					>
 					<select
 						id="bookingId"
 						name="bookingId"
 						required
 						class="mt-1 block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 					>
-						<option value="">Select a completed job</option>
+						<option value="">{m.admin_feedback_select_booking()}</option>
 						{#each payload.bookings as booking (booking.id)}
 							<option value={booking.id}
 								>{booking.bookingNumber} · {booking.client.displayName}</option
@@ -49,21 +53,25 @@
 					{#if errors.bookingId}<p class="mt-1 text-xs text-danger">{errors.bookingId}</p>{/if}
 				</div>
 				<div>
-					<label for="rating" class="block text-sm font-medium text-foreground">Rating</label>
+					<label for="rating" class="block text-sm font-medium text-foreground"
+						>{m.common_rating()}</label
+					>
 					<select
 						id="rating"
 						name="rating"
 						class="mt-1 block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 					>
-						<option value="5">5 — Excellent</option>
-						<option value="4">4 — Good</option>
-						<option value="3">3 — Fair</option>
-						<option value="2">2 — Poor</option>
-						<option value="1">1 — Bad</option>
+						<option value="5">{m.admin_feedback_rating_5()}</option>
+						<option value="4">{m.admin_feedback_rating_4()}</option>
+						<option value="3">{m.admin_feedback_rating_3()}</option>
+						<option value="2">{m.admin_feedback_rating_2()}</option>
+						<option value="1">{m.admin_feedback_rating_1()}</option>
 					</select>
 				</div>
 				<div>
-					<label for="comment" class="block text-sm font-medium text-foreground">Comment</label>
+					<label for="comment" class="block text-sm font-medium text-foreground"
+						>{m.common_comment()}</label
+					>
 					<input
 						id="comment"
 						name="comment"
@@ -75,7 +83,7 @@
 						type="submit"
 						class="rounded-brand bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700"
 					>
-						Save feedback
+						{m.admin_feedback_save()}
 					</button>
 				</div>
 			</form>
@@ -87,12 +95,12 @@
 					class="bg-surface-muted text-left text-xs tracking-wide text-muted-foreground uppercase"
 				>
 					<tr>
-						<th class="px-5 py-3 font-medium">Client</th>
-						<th class="px-5 py-3 font-medium">Job</th>
-						<th class="px-5 py-3 font-medium">Rating</th>
-						<th class="px-5 py-3 font-medium">Comment</th>
-						<th class="px-5 py-3 font-medium">Submitted</th>
-						<th class="px-5 py-3 font-medium">Visibility</th>
+						<th class="px-5 py-3 font-medium">{m.common_client()}</th>
+						<th class="px-5 py-3 font-medium">{m.common_job()}</th>
+						<th class="px-5 py-3 font-medium">{m.common_rating()}</th>
+						<th class="px-5 py-3 font-medium">{m.common_comment()}</th>
+						<th class="px-5 py-3 font-medium">{m.admin_feedback_submitted()}</th>
+						<th class="px-5 py-3 font-medium">{m.admin_feedback_visibility()}</th>
 						<th class="px-5 py-3"></th>
 					</tr>
 				</thead>
@@ -110,7 +118,7 @@
 										? 'bg-success/10 text-success'
 										: 'bg-surface-muted text-muted-foreground'}"
 								>
-									{entry.isPublished ? 'Published' : 'Hidden'}
+									{entry.isPublished ? m.common_published() : m.common_hidden()}
 								</span>
 							</td>
 							<td class="px-5 py-3">
@@ -126,20 +134,23 @@
 											type="submit"
 											class="text-xs font-medium text-foreground hover:text-brand-700"
 										>
-											{entry.isPublished ? 'Hide' : 'Publish'}
+											{entry.isPublished ? m.common_hide() : m.common_publish()}
 										</button>
 									</form>
 									<form method="POST" action="?/delete" use:enhance>
 										<input type="hidden" name="id" value={entry.id} />
 										<button type="submit" class="text-xs text-muted-foreground hover:text-danger"
-											>Delete</button
+											>{m.common_delete()}</button
 										>
 									</form>
 								</div>
 							</td>
 						</tr>
 					{:else}
-						<tr><td class="px-5 py-6 text-muted-foreground" colspan="7">No feedback yet.</td></tr>
+						<tr>
+							<td class="px-5 py-6 text-muted-foreground" colspan="7">{m.admin_feedback_empty()}</td
+							>
+						</tr>
 					{/each}
 				</tbody>
 			</table>
@@ -149,7 +160,7 @@
 			class="rounded-brand border border-danger/30 bg-danger/5 px-3 py-2 text-sm text-danger"
 			role="alert"
 		>
-			Could not load feedback. Please refresh the page.
+			{m.admin_feedback_error()}
 		</p>
 	{/await}
 </div>

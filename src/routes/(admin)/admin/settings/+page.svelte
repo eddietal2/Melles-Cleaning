@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import type { PageProps } from './$types';
 	import PasswordInput from '$lib/components/ui/password-input.svelte';
+	import * as m from '$lib/paraglide/messages.js';
 
 	let { data, form }: PageProps = $props();
 
@@ -14,11 +15,36 @@
 		(form as { accountErrors?: Record<string, string> } | null)?.accountErrors ?? {}
 	);
 
+	const groupTitles: Record<string, (() => string) | undefined> = {
+		general: m.admin_settings_group_general,
+		contact: m.admin_settings_group_contact,
+		promotions: m.admin_settings_group_promotions
+	};
+
+	const fieldLabels: Record<string, (() => string) | undefined> = {
+		business_name: m.admin_settings_field_business_name,
+		business_city: m.admin_settings_field_business_city,
+		business_country: m.admin_settings_field_business_country,
+		business_hours: m.admin_settings_field_business_hours,
+		business_address: m.admin_settings_field_business_address,
+		business_phone: m.admin_settings_field_business_phone,
+		business_whatsapp: m.admin_settings_field_business_whatsapp,
+		business_email: m.admin_settings_field_business_email,
+		notification_email: m.admin_settings_field_notification_email,
+		referral_credit_tzs: m.admin_settings_field_referral_credit,
+		first_clean_discount_percent: m.admin_settings_field_first_clean
+	};
+
+	const fieldHints: Record<string, (() => string) | undefined> = {
+		business_phone: m.admin_settings_hint_business_phone,
+		business_whatsapp: m.admin_settings_hint_business_whatsapp,
+		notification_email: m.admin_settings_hint_notification_email
+	};
+
 	const groups = $derived(
 		['general', 'contact', 'promotions'].map((group) => ({
 			group,
-			title:
-				group === 'general' ? 'Business details' : group === 'contact' ? 'Contact' : 'Promotions',
+			title: groupTitles[group],
 			fields: data.fields.filter((field) => field.group === group)
 		}))
 	);
@@ -30,26 +56,30 @@
 
 <div class="space-y-8">
 	<div>
-		<h1 class="text-2xl font-semibold tracking-tight text-foreground">Business settings</h1>
+		<h1 class="text-2xl font-semibold tracking-tight text-foreground">
+			{m.admin_website_settings_title()}
+		</h1>
 		<p class="mt-1 text-sm text-muted-foreground">
-			These values feed the website header, footer, contact page and promotions.
+			{m.admin_settings_intro()}
 		</p>
 	</div>
 
 	{#if success}
 		<p class="rounded-brand border border-success/30 bg-success/5 px-3 py-2 text-sm text-success">
-			Settings saved.
+			{m.admin_settings_saved()}
 		</p>
 	{/if}
 
 	<form method="POST" action="?/update" class="space-y-6" use:enhance>
 		{#each groups as group (group.group)}
 			<section class="space-y-4 rounded-brand border border-border bg-background p-6 shadow-card">
-				<h2 class="text-sm font-semibold text-foreground">{group.title}</h2>
+				<h2 class="text-sm font-semibold text-foreground">{group.title?.()}</h2>
 				<div class="grid gap-4 sm:grid-cols-2">
 					{#each group.fields as field (field.key)}
 						<div>
-							<label for={field.key} class={labelClass}>{field.label}</label>
+							<label for={field.key} class={labelClass}
+								>{fieldLabels[field.key]?.() ?? field.label}</label
+							>
 							<input
 								id={field.key}
 								name={field.key}
@@ -58,7 +88,9 @@
 								class={inputClass}
 							/>
 							{#if field.hint}
-								<p class="mt-1 text-xs text-muted-foreground">{field.hint}</p>
+								<p class="mt-1 text-xs text-muted-foreground">
+									{fieldHints[field.key]?.() ?? field.hint}
+								</p>
 							{/if}
 						</div>
 					{/each}
@@ -70,16 +102,15 @@
 			type="submit"
 			class="rounded-brand bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700"
 		>
-			Save settings
+			{m.admin_settings_save()}
 		</button>
 	</form>
 
 	<section class="space-y-4 rounded-brand border border-border bg-background p-6 shadow-card">
 		<div>
-			<h2 class="text-sm font-semibold text-foreground">Your login</h2>
+			<h2 class="text-sm font-semibold text-foreground">{m.admin_settings_login_heading()}</h2>
 			<p class="mt-1 text-xs text-muted-foreground">
-				Change the email address and password you use to sign in. Your current password is required
-				to confirm any change.
+				{m.admin_settings_login_intro()}
 			</p>
 		</div>
 
@@ -98,7 +129,9 @@
 
 		<form method="POST" action="?/updateAccount" class="grid gap-4 sm:grid-cols-2" use:enhance>
 			<div class="sm:col-span-2">
-				<label for="accountEmail" class="block text-sm font-medium text-foreground">Email</label>
+				<label for="accountEmail" class="block text-sm font-medium text-foreground"
+					>{m.common_email()}</label
+				>
 				<input
 					id="accountEmail"
 					name="email"
@@ -114,7 +147,7 @@
 			<PasswordInput
 				id="currentPassword"
 				name="currentPassword"
-				label="Current password"
+				label={m.admin_settings_current_password()}
 				autocomplete="current-password"
 				required
 				error={accountErrors.currentPassword}
@@ -123,15 +156,15 @@
 			<PasswordInput
 				id="newPassword"
 				name="newPassword"
-				label="New password"
+				label={m.admin_settings_new_password()}
 				autocomplete="new-password"
-				placeholder="Leave blank to keep current"
+				placeholder={m.admin_settings_new_password_placeholder()}
 				error={accountErrors.newPassword}
 			/>
 			<PasswordInput
 				id="confirmPassword"
 				name="confirmPassword"
-				label="Confirm new password"
+				label={m.admin_settings_confirm_password()}
 				autocomplete="new-password"
 				error={accountErrors.confirmPassword}
 			/>
@@ -141,7 +174,7 @@
 					type="submit"
 					class="rounded-brand bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700"
 				>
-					Save login details
+					{m.admin_settings_save_login()}
 				</button>
 			</div>
 		</form>

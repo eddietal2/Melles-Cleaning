@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { PageProps } from './$types';
+	import * as m from '$lib/paraglide/messages.js';
 
 	let { data, form }: PageProps = $props();
 
@@ -13,11 +14,13 @@
 <div class="space-y-8">
 	<div>
 		<a class="text-sm text-muted-foreground hover:text-brand-700" href="/admin/website"
-			>← Website content</a
+			>{m.admin_website_back()}</a
 		>
-		<h1 class="mt-1 text-2xl font-semibold tracking-tight text-foreground">Testimonials</h1>
+		<h1 class="mt-1 text-2xl font-semibold tracking-tight text-foreground">
+			{m.admin_website_testimonials_title()}
+		</h1>
 		<p class="mt-1 text-sm text-muted-foreground">
-			Published reviews appear as social proof on the website.
+			{m.admin_testimonials_intro()}
 		</p>
 	</div>
 
@@ -36,27 +39,29 @@
 		class="grid gap-4 rounded-brand border border-border bg-background p-5 shadow-card sm:grid-cols-2"
 		use:enhance
 	>
-		<p class="text-sm font-semibold text-foreground sm:col-span-2">Add a testimonial</p>
+		<p class="text-sm font-semibold text-foreground sm:col-span-2">
+			{m.admin_testimonials_add_heading()}
+		</p>
 		<div>
-			<label for="clientName" class={labelClass}>Client name</label>
+			<label for="clientName" class={labelClass}>{m.admin_testimonials_client_name()}</label>
 			<input id="clientName" name="clientName" type="text" required class={inputClass} />
 		</div>
 		<div>
-			<label for="clientRole" class={labelClass}>Client role / location</label>
+			<label for="clientRole" class={labelClass}>{m.admin_testimonials_client_role()}</label>
 			<input
 				id="clientRole"
 				name="clientRole"
 				type="text"
-				placeholder="Homeowner, Dodoma"
+				placeholder={m.admin_testimonials_client_role_placeholder()}
 				class={inputClass}
 			/>
 		</div>
 		<div class="sm:col-span-2">
-			<label for="quote" class={labelClass}>Quote</label>
+			<label for="quote" class={labelClass}>{m.admin_testimonials_quote()}</label>
 			<textarea id="quote" name="quote" rows="3" required class={inputClass}></textarea>
 		</div>
 		<div>
-			<label for="rating" class={labelClass}>Rating (1–5)</label>
+			<label for="rating" class={labelClass}>{m.admin_testimonials_rating()}</label>
 			<input id="rating" name="rating" type="number" min="1" max="5" value="5" class={inputClass} />
 		</div>
 		<div class="flex items-end">
@@ -64,7 +69,7 @@
 				type="submit"
 				class="rounded-brand bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700"
 			>
-				Add testimonial
+				{m.admin_testimonials_add()}
 			</button>
 		</div>
 	</form>
@@ -75,7 +80,7 @@
 				<form method="POST" action="?/update" class="grid gap-3 sm:grid-cols-2" use:enhance>
 					<input type="hidden" name="id" value={item.id} />
 					<div>
-						<label for="n-{item.id}" class={labelClass}>Client name</label>
+						<label for="n-{item.id}" class={labelClass}>{m.admin_testimonials_client_name()}</label>
 						<input
 							id="n-{item.id}"
 							name="clientName"
@@ -85,7 +90,9 @@
 						/>
 					</div>
 					<div>
-						<label for="r-{item.id}" class={labelClass}>Role / location</label>
+						<label for="r-{item.id}" class={labelClass}
+							>{m.admin_testimonials_role_location()}</label
+						>
 						<input
 							id="r-{item.id}"
 							name="clientRole"
@@ -95,14 +102,14 @@
 						/>
 					</div>
 					<div class="sm:col-span-2">
-						<label for="t-{item.id}" class={labelClass}>Quote</label>
+						<label for="t-{item.id}" class={labelClass}>{m.admin_testimonials_quote()}</label>
 						<textarea id="t-{item.id}" name="quote" rows="3" class={inputClass}
 							>{item.quote}</textarea
 						>
 					</div>
 					<div class="flex items-center gap-4">
 						<label class="text-sm text-muted-foreground">
-							Rating
+							{m.common_rating()}
 							<input
 								name="rating"
 								type="number"
@@ -113,7 +120,7 @@
 							/>
 						</label>
 						<label class="text-sm text-muted-foreground">
-							Order
+							{m.common_order()}
 							<input
 								name="sortOrder"
 								type="number"
@@ -126,7 +133,7 @@
 						<button
 							type="submit"
 							class="rounded-brand bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-brand-700"
-							>Save</button
+							>{m.common_save()}</button
 						>
 					</div>
 				</form>
@@ -141,14 +148,15 @@
 								? 'bg-success/10 text-success'
 								: 'bg-surface-muted text-muted-foreground'}"
 						>
-							{item.isPublished ? 'Published' : 'Draft'}
+							{item.isPublished ? m.common_published() : m.common_draft()}
 						</button>
 					</form>
 					<form method="POST" action="?/delete" use:enhance>
 						<input type="hidden" name="id" value={item.id} />
 						<button
 							type="submit"
-							class="text-xs font-medium text-muted-foreground hover:text-danger">Delete</button
+							class="text-xs font-medium text-muted-foreground hover:text-danger"
+							>{m.common_delete()}</button
 						>
 					</form>
 				</div>

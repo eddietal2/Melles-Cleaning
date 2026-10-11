@@ -6,15 +6,16 @@
 	import PhoneInput from '$lib/components/ui/phone-input.svelte';
 	import Spinner from '$lib/components/ui/spinner.svelte';
 	import TableSkeleton from '$lib/components/ui/table-skeleton.svelte';
+	import * as m from '$lib/paraglide/messages.js';
 	import { CLIENT_STATUSES, CLIENT_TYPES } from '$lib/schemas/client';
 	import { formatDate } from '$lib/utils/dates';
 	import { formatTzPhone } from '$lib/utils/phone';
 	import { toast } from '$lib/utils/toast';
 	import {
-		CLIENT_STATUS_LABELS,
-		CLIENT_TYPE_LABELS,
 		badgeClass,
-		clientStatusTone
+		clientStatusLabel,
+		clientStatusTone,
+		clientTypeLabel
 	} from '$lib/utils/status';
 
 	let { data, form }: PageProps = $props();
@@ -104,10 +105,10 @@
 	function sortValue(client: ClientRow): string | number {
 		const values: Record<SortKey, string | number> = {
 			displayName: client.displayName.toLowerCase(),
-			clientType: CLIENT_TYPE_LABELS[client.clientType] ?? client.clientType,
+			clientType: clientTypeLabel(client.clientType),
 			location: [client.area, client.city].filter(Boolean).join(' ').toLowerCase(),
 			contact: (client.contacts[0]?.name ?? '').toLowerCase(),
-			status: CLIENT_STATUS_LABELS[client.status] ?? client.status,
+			status: clientStatusLabel(client.status),
 			jobs: client._count.bookings,
 			quotes: client._count.quotes,
 			invoices: client._count.invoices,
@@ -132,10 +133,11 @@
 <div class="space-y-8">
 	<div class="flex flex-wrap items-start justify-between gap-4">
 		<div>
-			<h1 class="text-2xl font-semibold tracking-tight text-foreground">Clients</h1>
+			<h1 class="text-2xl font-semibold tracking-tight text-foreground">
+				{m.admin_clients_title()}
+			</h1>
 			<p class="mt-1 text-sm text-muted-foreground">
-				People and businesses you clean for. New clients can be added manually or converted from a
-				lead.
+				{m.admin_clients_intro()}
 			</p>
 		</div>
 		<button
@@ -143,11 +145,11 @@
 			class="inline-flex shrink-0 items-center gap-2 rounded-brand bg-accent-600 px-4 py-2 text-sm font-semibold text-white shadow-card transition hover:bg-accent-700"
 			onclick={() => (showForm = true)}
 		>
-			Add a client
+			{m.admin_clients_add()}
 		</button>
 	</div>
 
-	<Modal open={showForm} title="Add a client" onclose={() => (showForm = false)}>
+	<Modal open={showForm} title={m.admin_clients_add()} onclose={() => (showForm = false)}>
 		<form
 			method="POST"
 			action="?/create"
@@ -159,7 +161,7 @@
 					savingClient = false;
 					if (result.type === 'success') {
 						showForm = false;
-						toast.success('Client added.');
+						toast.success(m.admin_clients_toast_added());
 					}
 				};
 			}}
@@ -167,7 +169,7 @@
 			<div class="grid gap-4 sm:grid-cols-2">
 				<div>
 					<label for="displayName" class="block text-sm font-medium text-foreground"
-						>Client name</label
+						>{m.common_client_name()}</label
 					>
 					<input
 						id="displayName"
@@ -178,27 +180,33 @@
 					{#if errors.displayName}<p class="mt-1 text-xs text-danger">{errors.displayName}</p>{/if}
 				</div>
 				<div>
-					<label for="clientType" class="block text-sm font-medium text-foreground">Type</label>
+					<label for="clientType" class="block text-sm font-medium text-foreground"
+						>{m.common_type()}</label
+					>
 					<select
 						id="clientType"
 						name="clientType"
 						class="mt-1 block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 					>
-						<option value="RESIDENTIAL">Residential</option>
-						<option value="COMMERCIAL">Commercial</option>
+						<option value="RESIDENTIAL">{m.status_client_type_residential()}</option>
+						<option value="COMMERCIAL">{m.status_client_type_commercial()}</option>
 					</select>
 				</div>
 				<div>
-					<label for="area" class="block text-sm font-medium text-foreground">Area</label>
+					<label for="area" class="block text-sm font-medium text-foreground"
+						>{m.common_area()}</label
+					>
 					<input
 						id="area"
 						name="area"
-						placeholder="e.g. Area C"
+						placeholder={m.admin_clients_area_placeholder()}
 						class="mt-1 block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 					/>
 				</div>
 				<div>
-					<label for="city" class="block text-sm font-medium text-foreground">City</label>
+					<label for="city" class="block text-sm font-medium text-foreground"
+						>{m.common_city()}</label
+					>
 					<input
 						id="city"
 						name="city"
@@ -209,9 +217,13 @@
 			</div>
 
 			<fieldset class="grid gap-4 border-t border-border pt-4 sm:grid-cols-2">
-				<legend class="text-sm font-semibold text-foreground">Primary contact (optional)</legend>
+				<legend class="text-sm font-semibold text-foreground">
+					{m.admin_clients_primary_contact()}
+				</legend>
 				<div>
-					<label for="contactName" class="block text-sm font-medium text-foreground">Name</label>
+					<label for="contactName" class="block text-sm font-medium text-foreground"
+						>{m.common_name()}</label
+					>
 					<input
 						id="contactName"
 						name="contactName"
@@ -219,25 +231,31 @@
 					/>
 				</div>
 				<div>
-					<label for="contactPhone" class="block text-sm font-medium text-foreground">Phone</label>
+					<label for="contactPhone" class="block text-sm font-medium text-foreground"
+						>{m.common_phone()}</label
+					>
 					<PhoneInput id="contactPhone" name="contactPhone" />
 				</div>
 				<div>
-					<label for="contactRole" class="block text-sm font-medium text-foreground">Role</label>
+					<label for="contactRole" class="block text-sm font-medium text-foreground"
+						>{m.common_role()}</label
+					>
 					<input
 						id="contactRole"
 						name="contactRole"
-						placeholder="Role (optional)"
+						placeholder={m.common_role_optional_placeholder()}
 						class="mt-1 block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 					/>
 				</div>
 				<div>
-					<label for="contactEmail" class="block text-sm font-medium text-foreground">Email</label>
+					<label for="contactEmail" class="block text-sm font-medium text-foreground"
+						>{m.common_email()}</label
+					>
 					<input
 						id="contactEmail"
 						name="contactEmail"
 						type="email"
-						placeholder="Email (optional)"
+						placeholder={m.common_email_optional_placeholder()}
 						class="mt-1 block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 					/>
 				</div>
@@ -249,7 +267,7 @@
 				class="inline-flex items-center gap-2 rounded-brand bg-accent-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-700 disabled:cursor-not-allowed disabled:opacity-60"
 			>
 				{#if savingClient}<Spinner class="h-4 w-4" />{/if}
-				Save client
+				{m.admin_clients_save()}
 			</button>
 		</form>
 	</Modal>
@@ -258,28 +276,28 @@
 		<input
 			type="search"
 			bind:value={query}
-			placeholder="Search clients…"
-			aria-label="Search clients"
+			placeholder={m.admin_clients_search_placeholder()}
+			aria-label={m.admin_clients_search_aria()}
 			class="min-w-48 flex-1 rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 		/>
 		<select
 			bind:value={statusFilter}
-			aria-label="Filter by status"
+			aria-label={m.admin_clients_filter_status()}
 			class="rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 		>
-			<option value="ALL">All statuses</option>
+			<option value="ALL">{m.admin_clients_all_statuses()}</option>
 			{#each CLIENT_STATUSES as status (status)}
-				<option value={status}>{CLIENT_STATUS_LABELS[status]}</option>
+				<option value={status}>{clientStatusLabel(status)}</option>
 			{/each}
 		</select>
 		<select
 			bind:value={typeFilter}
-			aria-label="Filter by type"
+			aria-label={m.admin_clients_filter_type()}
 			class="rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 		>
-			<option value="ALL">All types</option>
+			<option value="ALL">{m.admin_clients_all_types()}</option>
 			{#each CLIENT_TYPES as type (type)}
-				<option value={type}>{CLIENT_TYPE_LABELS[type]}</option>
+				<option value={type}>{clientTypeLabel(type)}</option>
 			{/each}
 		</select>
 		{#if query || statusFilter !== 'ALL' || typeFilter !== 'ALL'}
@@ -288,7 +306,7 @@
 				class="rounded-brand px-3 py-2 text-sm font-medium text-muted-foreground transition hover:text-foreground"
 				onclick={resetFilters}
 			>
-				Clear
+				{m.common_clear()}
 			</button>
 		{/if}
 	</div>
@@ -319,16 +337,16 @@
 					class="bg-surface-muted text-left text-xs tracking-wide text-muted-foreground uppercase"
 				>
 					<tr>
-						{@render sortHeader('Client', 'displayName')}
-						{@render sortHeader('Type', 'clientType')}
-						{@render sortHeader('Location', 'location')}
-						{@render sortHeader('Primary contact', 'contact')}
-						{@render sortHeader('Status', 'status')}
-						{@render sortHeader('Jobs', 'jobs', 'right')}
-						{@render sortHeader('Quotes', 'quotes', 'right')}
-						{@render sortHeader('Invoices', 'invoices', 'right')}
-						{@render sortHeader('Created', 'createdAt')}
-						<th class="px-5 py-3 text-right font-medium">Actions</th>
+						{@render sortHeader(m.common_client(), 'displayName')}
+						{@render sortHeader(m.common_type(), 'clientType')}
+						{@render sortHeader(m.common_location(), 'location')}
+						{@render sortHeader(m.admin_clients_contact(), 'contact')}
+						{@render sortHeader(m.common_status(), 'status')}
+						{@render sortHeader(m.common_jobs(), 'jobs', 'right')}
+						{@render sortHeader(m.admin_nav_quotes(), 'quotes', 'right')}
+						{@render sortHeader(m.admin_nav_invoices(), 'invoices', 'right')}
+						{@render sortHeader(m.common_created(), 'createdAt')}
+						<th class="px-5 py-3 text-right font-medium">{m.common_actions()}</th>
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-border">
@@ -341,7 +359,7 @@
 								>
 							</td>
 							<td class="px-5 py-3 text-muted-foreground">
-								{CLIENT_TYPE_LABELS[client.clientType]}
+								{clientTypeLabel(client.clientType)}
 							</td>
 							<td class="px-5 py-3 text-muted-foreground">
 								{[client.area, client.city].filter(Boolean).join(' · ') || '—'}
@@ -358,7 +376,7 @@
 							</td>
 							<td class="px-5 py-3">
 								<span class={badgeClass(clientStatusTone(client.status))}
-									>{CLIENT_STATUS_LABELS[client.status]}</span
+									>{clientStatusLabel(client.status)}</span
 								>
 							</td>
 							<td class="px-5 py-3 text-right text-muted-foreground">{client._count.bookings}</td>
@@ -372,14 +390,14 @@
 									<a
 										href="/admin/clients/{client.id}"
 										class="text-xs font-medium text-brand-700 transition hover:text-brand-800"
-										>View</a
+										>{m.common_view()}</a
 									>
 									<button
 										type="button"
 										class="text-xs text-muted-foreground transition hover:text-danger"
 										onclick={() => (pendingDelete = { id: client.id, name: client.displayName })}
 									>
-										Delete
+										{m.common_delete()}
 									</button>
 								</div>
 							</td>
@@ -387,7 +405,7 @@
 					{:else}
 						<tr>
 							<td class="px-5 py-6 text-muted-foreground" colspan="10">
-								{clients.length === 0 ? 'No clients yet.' : 'No clients match your filters.'}
+								{clients.length === 0 ? m.admin_clients_empty() : m.admin_clients_no_match()}
 							</td>
 						</tr>
 					{/each}
@@ -399,7 +417,7 @@
 			class="rounded-brand border border-danger/30 bg-danger/5 px-3 py-2 text-sm text-danger"
 			role="alert"
 		>
-			Could not load clients. Please refresh the page.
+			{m.admin_clients_error()}
 		</p>
 	{/await}
 </div>
@@ -410,9 +428,12 @@
 
 <ConfirmDialog
 	open={pendingDelete !== null}
-	title="Delete client?"
-	message={`Are you sure you want to delete ${pendingDelete?.name ?? 'this client'}? All related bookings, quotes and invoices will also be removed. This cannot be undone.`}
-	confirmLabel="Delete client"
+	title={m.admin_clients_delete_title()}
+	message={m.admin_clients_delete_message({
+		name: pendingDelete?.name ?? m.common_client()
+	})}
+	confirmLabel={m.admin_clients_delete_confirm()}
+	cancelLabel={m.common_cancel()}
 	oncancel={() => (pendingDelete = null)}
 	onconfirm={() => {
 		deleteForm?.requestSubmit();

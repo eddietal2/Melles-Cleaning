@@ -1,13 +1,15 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { PageProps } from './$types';
+	import * as m from '$lib/paraglide/messages.js';
 	import { formatDate, formatDateTime, toDateInputValue } from '$lib/utils/dates';
 	import { formatTzs } from '$lib/utils/currency';
 	import {
-		INVOICE_STATUS_LABELS,
-		PAYMENT_METHOD_LABELS,
+		PAYMENT_METHOD_CODES,
 		badgeClass,
-		invoiceStatusTone
+		invoiceStatusLabel,
+		invoiceStatusTone,
+		paymentMethodLabel
 	} from '$lib/utils/status';
 
 	let { data, form }: PageProps = $props();
@@ -26,18 +28,21 @@
 <div class="space-y-8">
 	<div>
 		<a class="text-sm text-muted-foreground hover:text-brand-700" href="/admin/invoices"
-			>← Invoices</a
+			>{m.admin_invoices_back()}</a
 		>
 		<div class="mt-1 flex flex-wrap items-center gap-3">
 			<h1 class="text-2xl font-semibold tracking-tight text-foreground">
 				{data.invoice.invoiceNumber}
 			</h1>
 			<span class={badgeClass(invoiceStatusTone(data.invoice.status))}
-				>{INVOICE_STATUS_LABELS[data.invoice.status]}</span
+				>{invoiceStatusLabel(data.invoice.status)}</span
 			>
 		</div>
 		<p class="mt-1 text-sm text-muted-foreground">
-			{data.invoice.client.displayName} · due {formatDate(data.invoice.dueDate)}
+			{m.admin_invoices_due_line({
+				client: data.invoice.client.displayName,
+				date: formatDate(data.invoice.dueDate)
+			})}
 		</p>
 	</div>
 
@@ -52,12 +57,14 @@
 
 	<div class="grid gap-6 lg:grid-cols-3">
 		<section class="rounded-brand border border-border bg-background p-5 shadow-card lg:col-span-2">
-			<h2 class="text-sm font-semibold text-foreground">Line items</h2>
+			<h2 class="text-sm font-semibold text-foreground">{m.admin_invoices_line_items()}</h2>
 			<form method="POST" action="?/update" class="mt-4 space-y-4" use:enhance>
 				<input type="hidden" name="bookingId" value={data.invoice.bookingId ?? ''} />
 				<div class="grid gap-4 sm:grid-cols-2">
 					<div>
-						<label for="clientId" class="block text-sm font-medium text-foreground">Client</label>
+						<label for="clientId" class="block text-sm font-medium text-foreground"
+							>{m.common_client()}</label
+						>
 						<select
 							id="clientId"
 							name="clientId"
@@ -71,7 +78,9 @@
 						</select>
 					</div>
 					<div>
-						<label for="dueDate" class="block text-sm font-medium text-foreground">Due date</label>
+						<label for="dueDate" class="block text-sm font-medium text-foreground"
+							>{m.admin_invoices_due_date()}</label
+						>
 						<input
 							id="dueDate"
 							name="dueDate"
@@ -86,16 +95,16 @@
 					<div
 						class="grid grid-cols-12 gap-2 border-b border-border bg-surface-muted px-3 py-2 text-xs font-medium tracking-wide text-muted-foreground uppercase"
 					>
-						<span class="col-span-6">Description</span>
-						<span class="col-span-2">Qty</span>
-						<span class="col-span-4">Unit price (TZS)</span>
+						<span class="col-span-6">{m.common_description()}</span>
+						<span class="col-span-2">{m.common_quantity()}</span>
+						<span class="col-span-4">{m.common_unit_price()}</span>
 					</div>
 					{#each rows as row (row.id)}
 						<div class="grid grid-cols-12 gap-2 border-b border-border p-3 last:border-b-0">
 							<input
 								name="description"
 								value={row.description}
-								placeholder="Description"
+								placeholder={m.common_description()}
 								class="col-span-6 rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 							/>
 							<input
@@ -119,7 +128,7 @@
 
 				<div>
 					<label for="discountTzs" class="block text-sm font-medium text-foreground"
-						>Discount (TZS)</label
+						>{m.common_discount_tzs()}</label
 					>
 					<input
 						id="discountTzs"
@@ -137,19 +146,19 @@
 						type="submit"
 						class="rounded-brand bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700"
 					>
-						Save invoice
+						{m.admin_invoices_save()}
 					</button>
 					<dl class="text-right text-sm">
 						<div class="flex justify-end gap-6">
-							<dt class="text-muted-foreground">Subtotal</dt>
+							<dt class="text-muted-foreground">{m.common_subtotal()}</dt>
 							<dd>{formatTzs(data.invoice.subtotalTzs)}</dd>
 						</div>
 						<div class="flex justify-end gap-6">
-							<dt class="text-muted-foreground">Discount</dt>
+							<dt class="text-muted-foreground">{m.common_discount()}</dt>
 							<dd>− {formatTzs(data.invoice.discountTzs)}</dd>
 						</div>
 						<div class="mt-1 flex justify-end gap-6 text-base font-semibold">
-							<dt>Total</dt>
+							<dt>{m.common_total()}</dt>
 							<dd>{formatTzs(data.invoice.totalTzs)}</dd>
 						</div>
 					</dl>
@@ -159,10 +168,13 @@
 
 		<section class="space-y-6">
 			<div class="rounded-brand border border-border bg-background p-5 shadow-card">
-				<h2 class="text-sm font-semibold text-foreground">Balance</h2>
+				<h2 class="text-sm font-semibold text-foreground">{m.common_balance()}</h2>
 				<p class="mt-2 text-2xl font-semibold text-foreground">{formatTzs(balance)}</p>
 				<p class="text-xs text-muted-foreground">
-					Paid {formatTzs(paid)} of {formatTzs(data.invoice.totalTzs)}
+					{m.admin_invoices_paid_of({
+						paid: formatTzs(paid),
+						total: formatTzs(data.invoice.totalTzs)
+					})}
 				</p>
 
 				<div class="mt-4 flex flex-wrap gap-2 border-t border-border pt-4">
@@ -172,7 +184,7 @@
 								type="submit"
 								class="rounded-brand border border-border px-3 py-1.5 text-xs font-medium text-foreground transition hover:border-brand-500 hover:text-brand-700"
 							>
-								Issue invoice
+								{m.admin_invoices_issue()}
 							</button>
 						</form>
 					{/if}
@@ -182,7 +194,7 @@
 								type="submit"
 								class="rounded-brand border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:border-danger hover:text-danger"
 							>
-								Void
+								{m.admin_invoices_void()}
 							</button>
 						</form>
 					{/if}
@@ -190,14 +202,14 @@
 			</div>
 
 			<div class="rounded-brand border border-border bg-background p-5 shadow-card">
-				<h2 class="text-sm font-semibold text-foreground">Promotions</h2>
+				<h2 class="text-sm font-semibold text-foreground">{m.admin_invoices_promotions()}</h2>
 				<div class="mt-3 flex flex-wrap gap-2">
 					<form method="POST" action="?/applyFirstClean" use:enhance>
 						<button
 							type="submit"
 							class="rounded-brand border border-border px-3 py-1.5 text-xs font-medium text-foreground transition hover:border-brand-500 hover:text-brand-700"
 						>
-							Apply first-clean discount
+							{m.admin_invoices_apply_first_clean()}
 						</button>
 					</form>
 					<form method="POST" action="?/applyReferralCredit" use:enhance>
@@ -205,12 +217,14 @@
 							type="submit"
 							class="rounded-brand border border-border px-3 py-1.5 text-xs font-medium text-foreground transition hover:border-brand-500 hover:text-brand-700"
 						>
-							Apply referral credit
+							{m.admin_invoices_apply_referral()}
 						</button>
 					</form>
 				</div>
 
-				<h2 class="mt-5 text-sm font-semibold text-foreground">Request mobile money</h2>
+				<h2 class="mt-5 text-sm font-semibold text-foreground">
+					{m.admin_invoices_request_mobile()}
+				</h2>
 				<form
 					method="POST"
 					action="?/requestMobileMoney"
@@ -219,25 +233,27 @@
 				>
 					<input
 						name="phone"
-						placeholder="07XX XXX XXX"
+						placeholder={m.admin_invoices_phone_placeholder()}
 						class="min-w-40 flex-1 rounded-brand border-border text-sm shadow-sm focus:border-brand-600 focus:ring-brand-600"
 					/>
 					<button
 						type="submit"
 						class="rounded-brand border border-border px-3 py-2 text-xs font-medium text-foreground hover:border-brand-500 hover:text-brand-700"
 					>
-						Send request
+						{m.admin_invoices_send_request()}
 					</button>
 				</form>
 
-				<h2 class="mt-5 text-sm font-semibold text-foreground">Send to client</h2>
+				<h2 class="mt-5 text-sm font-semibold text-foreground">
+					{m.admin_invoices_send_to_client()}
+				</h2>
 				<div class="mt-2 flex flex-wrap gap-2">
 					<form method="POST" action="?/notifyIssued" use:enhance>
 						<button
 							type="submit"
 							class="rounded-brand border border-border px-3 py-1.5 text-xs font-medium text-foreground transition hover:border-brand-500 hover:text-brand-700"
 						>
-							Send invoice
+							{m.admin_invoices_send_invoice()}
 						</button>
 					</form>
 					<form method="POST" action="?/notifyReminder" use:enhance>
@@ -245,21 +261,23 @@
 							type="submit"
 							class="rounded-brand border border-border px-3 py-1.5 text-xs font-medium text-foreground transition hover:border-brand-500 hover:text-brand-700"
 						>
-							Send reminder
+							{m.admin_invoices_send_reminder()}
 						</button>
 					</form>
 				</div>
 			</div>
 
 			<div class="rounded-brand border border-border bg-background p-5 shadow-card">
-				<h2 class="text-sm font-semibold text-foreground">Record a payment</h2>
+				<h2 class="text-sm font-semibold text-foreground">
+					{m.admin_invoices_record_payment_heading()}
+				</h2>
 				<form method="POST" action="?/recordPayment" class="mt-3 space-y-3" use:enhance>
 					<input
 						name="amountTzs"
 						type="number"
 						min="1"
 						step="1000"
-						placeholder="Amount (TZS)"
+						placeholder={m.common_amount_tzs()}
 						value={balance}
 						required
 						class="block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
@@ -268,13 +286,13 @@
 						name="method"
 						class="block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 					>
-						{#each Object.entries(PAYMENT_METHOD_LABELS) as [value, label] (value)}
-							<option {value}>{label}</option>
+						{#each PAYMENT_METHOD_CODES as value (value)}
+							<option {value}>{paymentMethodLabel(value)}</option>
 						{/each}
 					</select>
 					<input
 						name="reference"
-						placeholder="Reference (optional)"
+						placeholder={m.common_reference_optional()}
 						class="block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 					/>
 					<input
@@ -286,32 +304,32 @@
 						type="submit"
 						class="w-full rounded-brand bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700"
 					>
-						Record payment
+						{m.admin_invoices_record_payment()}
 					</button>
 				</form>
 			</div>
 
 			<div class="rounded-brand border border-border bg-background p-5 shadow-card">
-				<h2 class="text-sm font-semibold text-foreground">Payments</h2>
+				<h2 class="text-sm font-semibold text-foreground">{m.common_payments()}</h2>
 				<ul class="mt-3 space-y-3 text-sm">
 					{#each data.invoice.payments as payment (payment.id)}
 						<li class="flex items-start justify-between gap-3">
 							<div>
 								<p class="font-medium text-foreground">{formatTzs(payment.amountTzs)}</p>
 								<p class="text-xs text-muted-foreground">
-									{PAYMENT_METHOD_LABELS[payment.method]} · {formatDateTime(payment.receivedAt)}
+									{paymentMethodLabel(payment.method)} · {formatDateTime(payment.receivedAt)}
 									{#if payment.reference}· {payment.reference}{/if}
 								</p>
 							</div>
 							<form method="POST" action="?/deletePayment" use:enhance>
 								<input type="hidden" name="id" value={payment.id} />
 								<button type="submit" class="text-xs text-muted-foreground hover:text-danger"
-									>Remove</button
+									>{m.common_remove()}</button
 								>
 							</form>
 						</li>
 					{:else}
-						<li class="text-muted-foreground">No payments recorded.</li>
+						<li class="text-muted-foreground">{m.admin_invoices_no_payments()}</li>
 					{/each}
 				</ul>
 			</div>

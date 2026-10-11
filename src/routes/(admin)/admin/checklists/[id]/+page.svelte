@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { PageProps } from './$types';
+	import * as m from '$lib/paraglide/messages.js';
 	import { formatDateTime } from '$lib/utils/dates';
-	import { CHECKLIST_STATUS_LABELS, badgeClass, checklistStatusTone } from '$lib/utils/status';
+	import { badgeClass, checklistStatusLabel, checklistStatusTone } from '$lib/utils/status';
 
 	let { data }: PageProps = $props();
 
@@ -12,19 +13,23 @@
 <div class="space-y-8">
 	<div>
 		<a class="text-sm text-muted-foreground hover:text-brand-700" href="/admin/checklists"
-			>← Checklists</a
+			>{m.admin_checklists_back()}</a
 		>
 		<div class="mt-1 flex flex-wrap items-center gap-3">
 			<h1 class="text-2xl font-semibold tracking-tight text-foreground">
 				{data.checklist.booking.bookingNumber}
 			</h1>
 			<span class={badgeClass(checklistStatusTone(data.checklist.status))}
-				>{CHECKLIST_STATUS_LABELS[data.checklist.status]}</span
+				>{checklistStatusLabel(data.checklist.status)}</span
 			>
 		</div>
 		<p class="mt-1 text-sm text-muted-foreground">
-			{data.checklist.template.name} · {data.checklist.booking.client.displayName} · {checkedCount}/{data
-				.checklist.results.length} complete
+			{m.admin_checklists_progress({
+				template: data.checklist.template.name,
+				client: data.checklist.booking.client.displayName,
+				checked: checkedCount,
+				total: data.checklist.results.length
+			})}
 		</p>
 	</div>
 
@@ -48,13 +53,15 @@
 								<span class="block text-sm text-foreground">{row.item.label}</span>
 								{#if row.result.checkedAt}
 									<p class="text-xs text-muted-foreground">
-										Checked {formatDateTime(row.result.checkedAt)}
+										{m.admin_checklists_checked_at({
+											date: formatDateTime(row.result.checkedAt)
+										})}
 									</p>
 								{/if}
 								<input
 									name={`note-${row.result.id}`}
 									value={row.result.note ?? ''}
-									placeholder="Note (optional)"
+									placeholder={m.common_note_optional()}
 									class="mt-1 block w-full rounded-brand border-border text-sm shadow-sm focus:border-brand-600 focus:ring-brand-600"
 								/>
 							</div>
@@ -68,18 +75,20 @@
 			type="submit"
 			class="rounded-brand bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700"
 		>
-			Save progress
+			{m.admin_checklists_save_progress()}
 		</button>
 	</form>
 
 	<section class="rounded-brand border border-border bg-background p-5 shadow-card">
-		<h2 class="text-sm font-semibold text-foreground">Supervisor walkthrough & client sign-off</h2>
+		<h2 class="text-sm font-semibold text-foreground">{m.admin_checklists_signoff_heading()}</h2>
 		{#if data.checklist.signedOffAt}
 			<p class="mt-2 text-sm text-success">
-				Signed off {formatDateTime(data.checklist.signedOffAt)}
+				{m.admin_checklists_signed_off({ date: formatDateTime(data.checklist.signedOffAt) })}
 			</p>
 			{#if data.checklist.clientSignatureName}
-				<p class="text-sm text-muted-foreground">Client: {data.checklist.clientSignatureName}</p>
+				<p class="text-sm text-muted-foreground">
+					{m.admin_checklists_client_name({ name: data.checklist.clientSignatureName })}
+				</p>
 			{/if}
 		{:else}
 			<form
@@ -90,7 +99,7 @@
 			>
 				<div class="min-w-56 flex-1">
 					<label for="clientSignatureName" class="block text-sm font-medium text-foreground"
-						>Client name (sign-off)</label
+						>{m.admin_checklists_client_signoff_label()}</label
 					>
 					<input
 						id="clientSignatureName"
@@ -102,7 +111,7 @@
 					type="submit"
 					class="rounded-brand border border-brand-600 px-4 py-2 text-sm font-semibold text-brand-700 transition hover:bg-brand-50"
 				>
-					Complete checklist
+					{m.admin_checklists_complete()}
 				</button>
 			</form>
 		{/if}

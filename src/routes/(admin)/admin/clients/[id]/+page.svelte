@@ -4,21 +4,22 @@
 	import ConfirmDialog from '$lib/components/ui/confirm-dialog.svelte';
 	import PhoneInput from '$lib/components/ui/phone-input.svelte';
 	import Spinner from '$lib/components/ui/spinner.svelte';
+	import * as m from '$lib/paraglide/messages.js';
 	import { CLIENT_STATUSES } from '$lib/schemas/client';
 	import { formatDate, formatDateTime } from '$lib/utils/dates';
 	import { formatTzs } from '$lib/utils/currency';
 	import { formatTzPhone } from '$lib/utils/phone';
 	import { toast } from '$lib/utils/toast';
 	import {
-		CLIENT_STATUS_LABELS,
 		badgeClass,
+		bookingStatusLabel,
 		bookingStatusTone,
-		quoteStatusTone,
+		clientStatusLabel,
+		clientStatusTone,
+		invoiceStatusLabel,
 		invoiceStatusTone,
-		BOOKING_STATUS_LABELS,
-		QUOTE_STATUS_LABELS,
-		INVOICE_STATUS_LABELS,
-		clientStatusTone
+		quoteStatusLabel,
+		quoteStatusTone
 	} from '$lib/utils/status';
 
 	let { data, form }: PageProps = $props();
@@ -51,24 +52,25 @@
 
 <div class="space-y-8">
 	<div>
-		<a class="text-sm text-muted-foreground hover:text-brand-700" href="/admin/clients">← Clients</a
+		<a class="text-sm text-muted-foreground hover:text-brand-700" href="/admin/clients"
+			>{m.admin_clients_back()}</a
 		>
 		<div class="mt-1 flex flex-wrap items-center gap-3">
 			<h1 class="text-2xl font-semibold tracking-tight text-foreground">
 				{data.client.displayName}
 			</h1>
 			<span class={badgeClass(clientStatusTone(data.client.status))}
-				>{CLIENT_STATUS_LABELS[data.client.status]}</span
+				>{clientStatusLabel(data.client.status)}</span
 			>
 		</div>
 		<p class="mt-1 text-sm text-muted-foreground">
-			Client since {formatDate(data.client.since)}
+			{m.admin_clients_since({ date: formatDate(data.client.since) })}
 		</p>
 	</div>
 
 	<div class="grid gap-6 lg:grid-cols-2">
 		<section class="rounded-brand border border-border bg-background p-5 shadow-card">
-			<h2 class="text-sm font-semibold text-foreground">Profile</h2>
+			<h2 class="text-sm font-semibold text-foreground">{m.admin_clients_profile()}</h2>
 			<form
 				method="POST"
 				action="?/update"
@@ -78,12 +80,14 @@
 					return async ({ result, update }) => {
 						await update({ reset: false });
 						savingProfile = false;
-						if (result.type === 'success') toast.success('Client updated.');
+						if (result.type === 'success') toast.success(m.admin_clients_toast_updated());
 					};
 				}}
 			>
 				<div>
-					<label for="displayName" class="block text-sm font-medium text-foreground">Name</label>
+					<label for="displayName" class="block text-sm font-medium text-foreground"
+						>{m.common_name()}</label
+					>
 					<input
 						id="displayName"
 						name="displayName"
@@ -93,19 +97,23 @@
 				</div>
 				<div class="grid gap-3 sm:grid-cols-2">
 					<div>
-						<label for="clientType" class="block text-sm font-medium text-foreground">Type</label>
+						<label for="clientType" class="block text-sm font-medium text-foreground"
+							>{m.common_type()}</label
+						>
 						<select
 							id="clientType"
 							name="clientType"
 							value={data.client.clientType}
 							class="mt-1 block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 						>
-							<option value="RESIDENTIAL">Residential</option>
-							<option value="COMMERCIAL">Commercial</option>
+							<option value="RESIDENTIAL">{m.status_client_type_residential()}</option>
+							<option value="COMMERCIAL">{m.status_client_type_commercial()}</option>
 						</select>
 					</div>
 					<div>
-						<label for="status" class="block text-sm font-medium text-foreground">Status</label>
+						<label for="status" class="block text-sm font-medium text-foreground"
+							>{m.common_status()}</label
+						>
 						<select
 							id="status"
 							name="status"
@@ -113,12 +121,14 @@
 							class="mt-1 block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 						>
 							{#each CLIENT_STATUSES as status (status)}
-								<option value={status}>{CLIENT_STATUS_LABELS[status]}</option>
+								<option value={status}>{clientStatusLabel(status)}</option>
 							{/each}
 						</select>
 					</div>
 					<div>
-						<label for="city" class="block text-sm font-medium text-foreground">City</label>
+						<label for="city" class="block text-sm font-medium text-foreground"
+							>{m.common_city()}</label
+						>
 						<input
 							id="city"
 							name="city"
@@ -127,7 +137,9 @@
 						/>
 					</div>
 					<div>
-						<label for="area" class="block text-sm font-medium text-foreground">Area</label>
+						<label for="area" class="block text-sm font-medium text-foreground"
+							>{m.common_area()}</label
+						>
 						<input
 							id="area"
 							name="area"
@@ -137,7 +149,7 @@
 					</div>
 					<div>
 						<label for="addressLine" class="block text-sm font-medium text-foreground"
-							>Address</label
+							>{m.common_address()}</label
 						>
 						<input
 							id="addressLine"
@@ -148,7 +160,9 @@
 					</div>
 				</div>
 				<div>
-					<label for="notes" class="block text-sm font-medium text-foreground">Notes</label>
+					<label for="notes" class="block text-sm font-medium text-foreground"
+						>{m.common_notes()}</label
+					>
 					<textarea
 						id="notes"
 						name="notes"
@@ -163,14 +177,14 @@
 					class="inline-flex items-center gap-2 rounded-brand bg-accent-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-700 disabled:cursor-not-allowed disabled:opacity-60"
 				>
 					{#if savingProfile}<Spinner class="h-4 w-4" />{/if}
-					Save changes
+					{m.common_save_changes()}
 				</button>
 			</form>
 		</section>
 
 		<section class="space-y-4">
 			<div class="rounded-brand border border-border bg-background p-5 shadow-card">
-				<h2 class="text-sm font-semibold text-foreground">Contacts</h2>
+				<h2 class="text-sm font-semibold text-foreground">{m.admin_clients_contacts()}</h2>
 				<ul class="mt-3 space-y-2">
 					{#each data.client.contacts as contact (contact.id)}
 						<li class="text-sm">
@@ -178,7 +192,8 @@
 								<div>
 									<p class="font-medium text-foreground">
 										{contact.name}
-										{#if contact.isPrimary}<span class="text-xs text-brand-700">· Primary</span
+										{#if contact.isPrimary}<span class="text-xs text-brand-700"
+												>{m.admin_clients_primary()}</span
 											>{/if}
 									</p>
 									<p class="text-xs text-muted-foreground">
@@ -192,14 +207,14 @@
 										onclick={() =>
 											(editingContactId = editingContactId === contact.id ? null : contact.id)}
 									>
-										{editingContactId === contact.id ? 'Cancel' : 'Edit'}
+										{editingContactId === contact.id ? m.common_cancel() : m.common_edit()}
 									</button>
 									<button
 										type="button"
 										class="text-xs text-muted-foreground hover:text-danger"
 										onclick={() => (pendingContactDelete = contact)}
 									>
-										Remove
+										{m.common_remove()}
 									</button>
 								</div>
 							</div>
@@ -217,20 +232,20 @@
 											savingContact = false;
 											if (result.type === 'success') {
 												editingContactId = null;
-												toast.success('Contact updated.');
+												toast.success(m.admin_clients_contact_updated());
 											}
 										};
 									}}
 								>
 									<input type="hidden" name="id" value={contact.id} />
 									<div>
-										<label for="contact-name-{contact.id}" class="sr-only">Name</label>
+										<label for="contact-name-{contact.id}" class="sr-only">{m.common_name()}</label>
 										<input
 											id="contact-name-{contact.id}"
 											name="name"
 											value={contact.name}
 											required
-											placeholder="Contact name"
+											placeholder={m.admin_clients_contact_name_placeholder()}
 											class="block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 										/>
 										{#if contactErrors.name}<p class="mt-1 text-xs text-danger">
@@ -238,7 +253,9 @@
 											</p>{/if}
 									</div>
 									<div>
-										<label for="contact-phone-{contact.id}" class="sr-only">Phone</label>
+										<label for="contact-phone-{contact.id}" class="sr-only"
+											>{m.common_phone()}</label
+										>
 										<PhoneInput
 											id="contact-phone-{contact.id}"
 											name="phone"
@@ -250,13 +267,15 @@
 											</p>{/if}
 									</div>
 									<div>
-										<label for="contact-email-{contact.id}" class="sr-only">Email</label>
+										<label for="contact-email-{contact.id}" class="sr-only"
+											>{m.common_email()}</label
+										>
 										<input
 											id="contact-email-{contact.id}"
 											name="email"
 											type="email"
 											value={contact.email ?? ''}
-											placeholder="Email (optional)"
+											placeholder={m.common_email_optional_placeholder()}
 											class="block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 										/>
 										{#if contactErrors.email}<p class="mt-1 text-xs text-danger">
@@ -264,12 +283,12 @@
 											</p>{/if}
 									</div>
 									<div>
-										<label for="contact-role-{contact.id}" class="sr-only">Role</label>
+										<label for="contact-role-{contact.id}" class="sr-only">{m.common_role()}</label>
 										<input
 											id="contact-role-{contact.id}"
 											name="role"
 											value={contact.role ?? ''}
-											placeholder="Role (optional)"
+											placeholder={m.common_role_optional_placeholder()}
 											class="block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 										/>
 									</div>
@@ -280,14 +299,14 @@
 											class="inline-flex items-center gap-2 rounded-brand bg-brand-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
 										>
 											{#if savingContact}<Spinner class="h-4 w-4" />{/if}
-											Save contact
+											{m.admin_clients_save_contact()}
 										</button>
 									</div>
 								</form>
 							{/if}
 						</li>
 					{:else}
-						<li class="text-sm text-muted-foreground">No contacts on file.</li>
+						<li class="text-sm text-muted-foreground">{m.admin_clients_no_contacts()}</li>
 					{/each}
 				</ul>
 
@@ -305,17 +324,17 @@
 									savingContact = false;
 									if (result.type === 'success') {
 										showAddContact = false;
-										toast.success('Contact added.');
+										toast.success(m.admin_clients_contact_added());
 									}
 								};
 							}}
 						>
 							<div>
-								<label for="new-contact-name" class="sr-only">Name</label>
+								<label for="new-contact-name" class="sr-only">{m.common_name()}</label>
 								<input
 									id="new-contact-name"
 									name="name"
-									placeholder="Contact name"
+									placeholder={m.admin_clients_contact_name_placeholder()}
 									required
 									class="block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 								/>
@@ -324,19 +343,19 @@
 									</p>{/if}
 							</div>
 							<div>
-								<label for="new-contact-phone" class="sr-only">Phone</label>
+								<label for="new-contact-phone" class="sr-only">{m.common_phone()}</label>
 								<PhoneInput id="new-contact-phone" name="phone" required />
 								{#if contactErrors.phone}<p class="mt-1 text-xs text-danger">
 										{contactErrors.phone}
 									</p>{/if}
 							</div>
 							<div>
-								<label for="new-contact-email" class="sr-only">Email</label>
+								<label for="new-contact-email" class="sr-only">{m.common_email()}</label>
 								<input
 									id="new-contact-email"
 									name="email"
 									type="email"
-									placeholder="Email (optional)"
+									placeholder={m.common_email_optional_placeholder()}
 									class="block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 								/>
 								{#if contactErrors.email}<p class="mt-1 text-xs text-danger">
@@ -344,11 +363,11 @@
 									</p>{/if}
 							</div>
 							<div>
-								<label for="new-contact-role" class="sr-only">Role</label>
+								<label for="new-contact-role" class="sr-only">{m.common_role()}</label>
 								<input
 									id="new-contact-role"
 									name="role"
-									placeholder="Role (optional)"
+									placeholder={m.common_role_optional_placeholder()}
 									class="block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 								/>
 							</div>
@@ -359,14 +378,14 @@
 									class="inline-flex items-center gap-2 rounded-brand bg-brand-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
 								>
 									{#if savingContact}<Spinner class="h-4 w-4" />{/if}
-									Save contact
+									{m.admin_clients_save_contact()}
 								</button>
 								<button
 									type="button"
 									class="text-sm font-medium text-muted-foreground transition hover:text-foreground"
 									onclick={() => (showAddContact = false)}
 								>
-									Cancel
+									{m.common_cancel()}
 								</button>
 							</div>
 						</form>
@@ -376,7 +395,7 @@
 							class="rounded-brand bg-accent-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-accent-700"
 							onclick={() => (showAddContact = true)}
 						>
-							Add contact
+							{m.admin_clients_add_contact()}
 						</button>
 					{/if}
 				</div>
@@ -430,7 +449,7 @@
 	</div>
 
 	<section class="rounded-brand border border-border bg-background p-5 shadow-card">
-		<h2 class="text-sm font-semibold text-foreground">Recent jobs</h2>
+		<h2 class="text-sm font-semibold text-foreground">{m.admin_clients_recent_jobs()}</h2>
 		<ul class="mt-3 divide-y divide-border">
 			{#each data.client.bookings.slice(0, 6) as booking (booking.id)}
 				<li class="flex items-center justify-between gap-3 py-2 text-sm">
@@ -444,18 +463,18 @@
 						</p>
 					</div>
 					<span class={badgeClass(bookingStatusTone(booking.status))}
-						>{BOOKING_STATUS_LABELS[booking.status]}</span
+						>{bookingStatusLabel(booking.status)}</span
 					>
 				</li>
 			{:else}
-				<li class="py-3 text-sm text-muted-foreground">No jobs yet.</li>
+				<li class="py-3 text-sm text-muted-foreground">{m.admin_clients_no_jobs()}</li>
 			{/each}
 		</ul>
 	</section>
 
 	<section class="grid gap-6 lg:grid-cols-2">
 		<div class="rounded-brand border border-border bg-background p-5 shadow-card">
-			<h2 class="text-sm font-semibold text-foreground">Quotes</h2>
+			<h2 class="text-sm font-semibold text-foreground">{m.admin_nav_quotes()}</h2>
 			<ul class="mt-3 space-y-2 text-sm">
 				{#each data.client.quotes as quote (quote.id)}
 					<li class="flex items-center justify-between gap-3">
@@ -464,17 +483,17 @@
 						>
 						<span class="text-muted-foreground">{formatTzs(quote.totalTzs)}</span>
 						<span class={badgeClass(quoteStatusTone(quote.status))}
-							>{QUOTE_STATUS_LABELS[quote.status]}</span
+							>{quoteStatusLabel(quote.status)}</span
 						>
 					</li>
 				{:else}
-					<li class="text-muted-foreground">No quotes yet.</li>
+					<li class="text-muted-foreground">{m.admin_clients_no_quotes()}</li>
 				{/each}
 			</ul>
 		</div>
 
 		<div class="rounded-brand border border-border bg-background p-5 shadow-card">
-			<h2 class="text-sm font-semibold text-foreground">Invoices</h2>
+			<h2 class="text-sm font-semibold text-foreground">{m.admin_nav_invoices()}</h2>
 			<ul class="mt-3 space-y-2 text-sm">
 				{#each data.client.invoices as invoice (invoice.id)}
 					<li class="flex items-center justify-between gap-3">
@@ -483,11 +502,11 @@
 						>
 						<span class="text-muted-foreground">{formatTzs(invoice.totalTzs)}</span>
 						<span class={badgeClass(invoiceStatusTone(invoice.status))}
-							>{INVOICE_STATUS_LABELS[invoice.status]}</span
+							>{invoiceStatusLabel(invoice.status)}</span
 						>
 					</li>
 				{:else}
-					<li class="text-muted-foreground">No invoices yet.</li>
+					<li class="text-muted-foreground">{m.admin_clients_no_invoices()}</li>
 				{/each}
 			</ul>
 		</div>
@@ -504,7 +523,7 @@
 			deletingContact = false;
 			if (result.type === 'success') {
 				pendingContactDelete = null;
-				toast.success('Contact removed.');
+				toast.success(m.admin_clients_contact_removed());
 			}
 		};
 	}}
@@ -517,9 +536,12 @@
 <ConfirmDialog
 	open={pendingContactDelete !== null}
 	loading={deletingContact}
-	title="Remove contact?"
-	message={`Are you sure you want to remove ${pendingContactDelete?.name ?? 'this contact'}? This cannot be undone.`}
-	confirmLabel="Remove contact"
+	title={m.admin_clients_remove_contact_title()}
+	message={m.admin_clients_remove_contact_message({
+		name: pendingContactDelete?.name ?? m.common_contact()
+	})}
+	confirmLabel={m.admin_clients_remove_contact_confirm()}
+	cancelLabel={m.common_cancel()}
 	oncancel={() => (pendingContactDelete = null)}
 	onconfirm={() => contactDeleteForm?.requestSubmit()}
 />

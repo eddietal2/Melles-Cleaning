@@ -3,10 +3,10 @@
 	import { formatDateTime } from '$lib/utils/dates';
 	import { formatTzs } from '$lib/utils/currency';
 	import {
-		BOOKING_STATUS_LABELS,
-		RECURRENCE_LABELS,
 		badgeClass,
-		bookingStatusTone
+		bookingStatusLabel,
+		bookingStatusTone,
+		recurrenceLabel
 	} from '$lib/utils/status';
 
 	let { data }: PageProps = $props();
@@ -26,13 +26,13 @@
 						<div class="flex items-center gap-2">
 							<h2 class="text-sm font-semibold text-foreground">{booking.service.name}</h2>
 							<span class={badgeClass(bookingStatusTone(booking.status))}>
-								{BOOKING_STATUS_LABELS[booking.status]}
+								{bookingStatusLabel(booking.status)}
 							</span>
 						</div>
 						<p class="mt-1 text-xs text-muted-foreground">
 							{formatDateTime(booking.scheduledStart)} · {booking.durationMinutes} minutes
 							{#if booking.recurrenceFrequency !== 'ONE_TIME'}
-								· {RECURRENCE_LABELS[booking.recurrenceFrequency]}
+								· {recurrenceLabel(booking.recurrenceFrequency)}
 							{/if}
 						</p>
 						{#if booking.addressSnapshot}

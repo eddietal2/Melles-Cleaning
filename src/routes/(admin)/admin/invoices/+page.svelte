@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { PageProps } from './$types';
+	import * as m from '$lib/paraglide/messages.js';
 	import { formatDate } from '$lib/utils/dates';
 	import { formatTzs } from '$lib/utils/currency';
-	import { INVOICE_STATUS_LABELS, badgeClass, invoiceStatusTone } from '$lib/utils/status';
+	import { badgeClass, invoiceStatusLabel, invoiceStatusTone } from '$lib/utils/status';
 	import TableSkeleton from '$lib/components/ui/table-skeleton.svelte';
 
 	let { data, form }: PageProps = $props();
@@ -18,10 +19,11 @@
 
 <div class="space-y-8">
 	<div>
-		<h1 class="text-2xl font-semibold tracking-tight text-foreground">Invoices</h1>
+		<h1 class="text-2xl font-semibold tracking-tight text-foreground">
+			{m.admin_invoices_title()}
+		</h1>
 		<p class="mt-1 text-sm text-muted-foreground">
-			Generate from a booking or build manually. Balances update automatically as payments are
-			recorded.
+			{m.admin_invoices_intro()}
 		</p>
 	</div>
 
@@ -39,7 +41,7 @@
 	{:then payload}
 		<details class="rounded-brand border border-border bg-background shadow-card">
 			<summary class="cursor-pointer px-5 py-4 text-sm font-semibold text-foreground"
-				>New invoice</summary
+				>{m.admin_invoices_new()}</summary
 			>
 			<form
 				method="POST"
@@ -49,14 +51,16 @@
 			>
 				<div class="grid gap-4 sm:grid-cols-3">
 					<div>
-						<label for="clientId" class="block text-sm font-medium text-foreground">Client</label>
+						<label for="clientId" class="block text-sm font-medium text-foreground"
+							>{m.common_client()}</label
+						>
 						<select
 							id="clientId"
 							name="clientId"
 							required
 							class="mt-1 block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 						>
-							<option value="">Select a client</option>
+							<option value="">{m.common_select_client()}</option>
 							{#each payload.clients as client (client.id)}
 								<option value={client.id}>{client.displayName}</option>
 							{/each}
@@ -65,14 +69,14 @@
 					</div>
 					<div>
 						<label for="bookingId" class="block text-sm font-medium text-foreground"
-							>From booking</label
+							>{m.admin_invoices_from_booking()}</label
 						>
 						<select
 							id="bookingId"
 							name="bookingId"
 							class="mt-1 block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 						>
-							<option value="">None — build manually</option>
+							<option value="">{m.admin_invoices_none_manual()}</option>
 							{#each payload.bookings as booking (booking.id)}
 								<option value={booking.id}
 									>{booking.bookingNumber} · {booking.client.displayName} · {formatTzs(
@@ -83,7 +87,9 @@
 						</select>
 					</div>
 					<div>
-						<label for="dueDate" class="block text-sm font-medium text-foreground">Due date</label>
+						<label for="dueDate" class="block text-sm font-medium text-foreground"
+							>{m.admin_invoices_due_date()}</label
+						>
 						<input
 							id="dueDate"
 							name="dueDate"
@@ -97,14 +103,14 @@
 					<div
 						class="grid grid-cols-12 gap-2 border-b border-border bg-surface-muted px-3 py-2 text-xs font-medium tracking-wide text-muted-foreground uppercase"
 					>
-						<span class="col-span-6">Description</span>
-						<span class="col-span-2">Qty</span>
-						<span class="col-span-4">Unit price (TZS)</span>
+						<span class="col-span-6">{m.common_description()}</span>
+						<span class="col-span-2">{m.common_quantity()}</span>
+						<span class="col-span-4">{m.common_unit_price()}</span>
 					</div>
 					<div class="grid grid-cols-12 gap-2 p-3">
 						<input
 							name="description"
-							placeholder="Optional when a booking is chosen"
+							placeholder={m.admin_invoices_description_placeholder()}
 							class="col-span-6 rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 						/>
 						<input
@@ -129,7 +135,7 @@
 					type="submit"
 					class="rounded-brand bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700"
 				>
-					Create invoice
+					{m.admin_invoices_create()}
 				</button>
 			</form>
 		</details>
@@ -140,12 +146,12 @@
 					class="bg-surface-muted text-left text-xs tracking-wide text-muted-foreground uppercase"
 				>
 					<tr>
-						<th class="px-5 py-3 font-medium">Invoice</th>
-						<th class="px-5 py-3 font-medium">Client</th>
-						<th class="px-5 py-3 font-medium">Issued</th>
-						<th class="px-5 py-3 font-medium">Total</th>
-						<th class="px-5 py-3 font-medium">Balance</th>
-						<th class="px-5 py-3 font-medium">Status</th>
+						<th class="px-5 py-3 font-medium">{m.common_invoice()}</th>
+						<th class="px-5 py-3 font-medium">{m.common_client()}</th>
+						<th class="px-5 py-3 font-medium">{m.common_issued()}</th>
+						<th class="px-5 py-3 font-medium">{m.common_total()}</th>
+						<th class="px-5 py-3 font-medium">{m.common_balance()}</th>
+						<th class="px-5 py-3 font-medium">{m.common_status()}</th>
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-border">
@@ -172,12 +178,15 @@
 							>
 							<td class="px-5 py-3">
 								<span class={badgeClass(invoiceStatusTone(invoice.status))}
-									>{INVOICE_STATUS_LABELS[invoice.status]}</span
+									>{invoiceStatusLabel(invoice.status)}</span
 								>
 							</td>
 						</tr>
 					{:else}
-						<tr><td class="px-5 py-6 text-muted-foreground" colspan="6">No invoices yet.</td></tr>
+						<tr>
+							<td class="px-5 py-6 text-muted-foreground" colspan="6">{m.admin_invoices_empty()}</td
+							>
+						</tr>
 					{/each}
 				</tbody>
 			</table>
@@ -187,7 +196,7 @@
 			class="rounded-brand border border-danger/30 bg-danger/5 px-3 py-2 text-sm text-danger"
 			role="alert"
 		>
-			Could not load invoices. Please refresh the page.
+			{m.admin_invoices_error()}
 		</p>
 	{/await}
 </div>

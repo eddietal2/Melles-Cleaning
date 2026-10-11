@@ -2,8 +2,9 @@
 	import type { PageProps } from './$types';
 	import { formatDateTime } from '$lib/utils/dates';
 	import { formatTzs } from '$lib/utils/currency';
-	import { BOOKING_STATUS_LABELS, badgeClass, bookingStatusTone } from '$lib/utils/status';
+	import { badgeClass, bookingStatusLabel, bookingStatusTone } from '$lib/utils/status';
 	import Skeleton from '$lib/components/ui/skeleton.svelte';
+	import * as m from '$lib/paraglide/messages.js';
 
 	let { data }: PageProps = $props();
 
@@ -12,8 +13,10 @@
 
 <div class="space-y-8">
 	<div>
-		<h1 class="text-2xl font-semibold tracking-tight text-foreground">Dashboard</h1>
-		<p class="mt-1 text-sm text-muted-foreground">Your operational overview.</p>
+		<h1 class="text-2xl font-semibold tracking-tight text-foreground">
+			{m.admin_dashboard_title()}
+		</h1>
+		<p class="mt-1 text-sm text-muted-foreground">{m.admin_dashboard_intro()}</p>
 	</div>
 
 	{#await data.streamed}
@@ -44,35 +47,43 @@
 				href="/admin/quotes"
 				class="rounded-brand border border-border bg-background p-5 shadow-card transition hover:border-brand-500"
 			>
-				<p class="text-xs tracking-wide text-muted-foreground uppercase">Pipeline value</p>
+				<p class="text-xs tracking-wide text-muted-foreground uppercase">
+					{m.admin_dashboard_pipeline_value()}
+				</p>
 				<p class="mt-2 text-2xl font-semibold text-foreground">
 					{formatTzs(metrics.pipelineValueTzs)}
 				</p>
-				<p class="mt-1 text-xs text-muted-foreground">Open quotes and drafts</p>
+				<p class="mt-1 text-xs text-muted-foreground">{m.admin_dashboard_open_quotes()}</p>
 			</a>
 			<a
 				href="/admin/bookings"
 				class="rounded-brand border border-border bg-background p-5 shadow-card transition hover:border-brand-500"
 			>
-				<p class="text-xs tracking-wide text-muted-foreground uppercase">Jobs this week</p>
+				<p class="text-xs tracking-wide text-muted-foreground uppercase">
+					{m.admin_dashboard_jobs_week()}
+				</p>
 				<p class="mt-2 text-2xl font-semibold text-foreground">{metrics.jobsThisWeek}</p>
-				<p class="mt-1 text-xs text-muted-foreground">Scheduled in the next 7 days</p>
+				<p class="mt-1 text-xs text-muted-foreground">{m.admin_dashboard_scheduled_7()}</p>
 			</a>
 			<div class="rounded-brand border border-border bg-background p-5 shadow-card">
-				<p class="text-xs tracking-wide text-muted-foreground uppercase">Revenue this month</p>
+				<p class="text-xs tracking-wide text-muted-foreground uppercase">
+					{m.admin_dashboard_revenue_month()}
+				</p>
 				<p class="mt-2 text-2xl font-semibold text-foreground">
 					{formatTzs(metrics.monthlyRevenueTzs)}
 				</p>
-				<p class="mt-1 text-xs text-muted-foreground">Payments recorded in TZS</p>
+				<p class="mt-1 text-xs text-muted-foreground">{m.admin_dashboard_payments_tzs()}</p>
 			</div>
 			<a
 				href="/admin/invoices"
 				class="rounded-brand border border-border bg-background p-5 shadow-card transition hover:border-brand-500"
 			>
-				<p class="text-xs tracking-wide text-muted-foreground uppercase">Unpaid invoices</p>
+				<p class="text-xs tracking-wide text-muted-foreground uppercase">
+					{m.admin_dashboard_unpaid_invoices()}
+				</p>
 				<p class="mt-2 text-2xl font-semibold text-foreground">{metrics.unpaidInvoiceCount}</p>
 				<p class="mt-1 text-xs text-muted-foreground">
-					{formatTzs(metrics.unpaidInvoiceTzs)} outstanding
+					{m.admin_dashboard_outstanding({ amount: formatTzs(metrics.unpaidInvoiceTzs) })}
 				</p>
 			</a>
 		</div>
@@ -80,8 +91,12 @@
 		<div class="grid gap-6 lg:grid-cols-2">
 			<section class="rounded-brand border border-border bg-background p-5 shadow-card">
 				<div class="flex items-center justify-between">
-					<h2 class="text-sm font-semibold text-foreground">Upcoming jobs</h2>
-					<a href="/admin/bookings" class="text-xs text-brand-700 hover:underline">View all</a>
+					<h2 class="text-sm font-semibold text-foreground">
+						{m.admin_dashboard_upcoming_jobs()}
+					</h2>
+					<a href="/admin/bookings" class="text-xs text-brand-700 hover:underline"
+						>{m.common_view_all()}</a
+					>
 				</div>
 				<ul class="mt-3 divide-y divide-border">
 					{#each metrics.upcomingBookings as booking (booking.id)}
@@ -98,19 +113,25 @@
 								</p>
 							</div>
 							<span class={badgeClass(bookingStatusTone(booking.status))}>
-								{BOOKING_STATUS_LABELS[booking.status]}
+								{bookingStatusLabel(booking.status)}
 							</span>
 						</li>
 					{:else}
-						<li class="py-3 text-sm text-muted-foreground">No upcoming jobs scheduled.</li>
+						<li class="py-3 text-sm text-muted-foreground">
+							{m.admin_dashboard_no_upcoming()}
+						</li>
 					{/each}
 				</ul>
 			</section>
 
 			<section class="rounded-brand border border-border bg-background p-5 shadow-card">
 				<div class="flex items-center justify-between">
-					<h2 class="text-sm font-semibold text-foreground">Recent feedback</h2>
-					<a href="/admin/feedback" class="text-xs text-brand-700 hover:underline">View all</a>
+					<h2 class="text-sm font-semibold text-foreground">
+						{m.admin_dashboard_recent_feedback()}
+					</h2>
+					<a href="/admin/feedback" class="text-xs text-brand-700 hover:underline"
+						>{m.common_view_all()}</a
+					>
 				</div>
 				<ul class="mt-3 divide-y divide-border">
 					{#each metrics.recentFeedback as entry (entry.id)}
@@ -119,10 +140,12 @@
 								<span class="font-medium text-foreground">{entry.booking.client.displayName}</span>
 								<span class="text-muted-foreground">{entry.rating} / 5</span>
 							</div>
-							<p class="text-xs text-muted-foreground">{entry.comment ?? 'No comment.'}</p>
+							<p class="text-xs text-muted-foreground">
+								{entry.comment ?? m.common_no_comment()}
+							</p>
 						</li>
 					{:else}
-						<li class="py-3 text-sm text-muted-foreground">No feedback recorded yet.</li>
+						<li class="py-3 text-sm text-muted-foreground">{m.admin_dashboard_no_feedback()}</li>
 					{/each}
 				</ul>
 			</section>
@@ -132,7 +155,7 @@
 			class="rounded-brand border border-danger/30 bg-danger/5 px-3 py-2 text-sm text-danger"
 			role="alert"
 		>
-			Could not load the dashboard. Please refresh the page.
+			{m.admin_dashboard_error()}
 		</p>
 	{/await}
 </div>

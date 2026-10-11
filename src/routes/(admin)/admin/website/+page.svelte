@@ -1,41 +1,42 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
+	import * as m from '$lib/paraglide/messages.js';
 
 	let { data }: PageProps = $props();
 
 	const sections = $derived([
 		{
 			href: '/admin/website/services',
-			title: 'Services & pricing',
-			description: 'Edit service pages and the TZS pricing packages shown on the website.',
+			title: m.admin_website_services_title(),
+			description: m.admin_website_services_desc(),
 			count: data.counts.services,
-			countLabel: 'services'
+			countLabel: m.admin_website_services_count()
 		},
 		{
 			href: '/admin/website/faq',
-			title: 'FAQ',
-			description: 'Questions and answers displayed on the site.',
+			title: m.admin_website_faq_title(),
+			description: m.admin_website_faq_desc(),
 			count: data.counts.faq,
-			countLabel: 'items'
+			countLabel: m.admin_website_faq_count()
 		},
 		{
 			href: '/admin/website/testimonials',
-			title: 'Testimonials',
-			description: 'Client reviews shown on the homepage.',
+			title: m.admin_website_testimonials_title(),
+			description: m.admin_website_testimonials_desc(),
 			count: data.counts.testimonials,
-			countLabel: 'reviews'
+			countLabel: m.admin_website_testimonials_count()
 		},
 		{
 			href: '/admin/media',
-			title: 'Media library',
-			description: 'Upload photos and manage the public gallery.',
+			title: m.admin_website_media_title(),
+			description: m.admin_website_media_desc(),
 			count: data.counts.media,
-			countLabel: 'images'
+			countLabel: m.admin_website_media_count()
 		},
 		{
 			href: '/admin/settings',
-			title: 'Business settings',
-			description: 'Contact details, hours and promotion values.',
+			title: m.admin_website_settings_title(),
+			description: m.admin_website_settings_desc(),
 			count: null,
 			countLabel: ''
 		}
@@ -44,11 +45,10 @@
 
 <div class="space-y-8">
 	<div>
-		<h1 class="text-2xl font-semibold tracking-tight text-foreground">Website content</h1>
-		<p class="mt-1 text-sm text-muted-foreground">
-			Update everything visitors see without touching code. Changes appear on the live site
-			immediately.
-		</p>
+		<h1 class="text-2xl font-semibold tracking-tight text-foreground">
+			{m.admin_website_title()}
+		</h1>
+		<p class="mt-1 text-sm text-muted-foreground">{m.admin_website_intro()}</p>
 	</div>
 
 	<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">

@@ -9,6 +9,7 @@
 	import ConfirmDialog from '$lib/components/ui/confirm-dialog.svelte';
 	import Skeleton from '$lib/components/ui/skeleton.svelte';
 	import Spinner from '$lib/components/ui/spinner.svelte';
+	import * as m from '$lib/paraglide/messages.js';
 	import type { QuoteDocumentLang, QuoteItemRow, QuoteTerms } from '$lib/schemas/quote';
 	import { formatTzs } from '$lib/utils/currency';
 	import { formatDateTime, toDateInputValue } from '$lib/utils/dates';
@@ -93,9 +94,9 @@
 	let termsLang = $state<QuoteDocumentLang>('en');
 
 	/** Language options for the terms editor. */
-	const termsLanguages: { value: QuoteDocumentLang; label: string }[] = [
-		{ value: 'en', label: 'English' },
-		{ value: 'sw', label: 'Kiswahili' }
+	const termsLanguages: { value: QuoteDocumentLang; label: () => string }[] = [
+		{ value: 'en', label: m.lang_en },
+		{ value: 'sw', label: m.lang_sw }
 	];
 
 	/** Maximum length of the free-text terms shown on the document. */
@@ -132,10 +133,11 @@
 	let downloadMenu = $state<HTMLElement | null>(null);
 
 	/** Language options offered by the download menu. */
-	const downloadLanguages: { value: QuoteDocumentLang; label: string; hint: string }[] = [
-		{ value: 'en', label: 'English', hint: 'English document' },
-		{ value: 'sw', label: 'Kiswahili', hint: 'Swahili document' }
-	];
+	const downloadLanguages: { value: QuoteDocumentLang; label: () => string; hint: () => string }[] =
+		[
+			{ value: 'en', label: m.lang_en, hint: m.admin_quotes_english_document },
+			{ value: 'sw', label: m.lang_sw, hint: m.admin_quotes_swahili_document }
+		];
 
 	// Close the download menu when clicking anywhere outside it.
 	$effect(() => {
@@ -257,7 +259,7 @@
 
 	onMount(() => {
 		// A friendly tab title that matches the downloaded file.
-		pageTitle.set(isNew ? 'New quote' : data.quote.quoteNumber);
+		pageTitle.set(isNew ? m.admin_quotes_new() : data.quote.quoteNumber);
 
 		// The quotes list "Download" action links here with ?print=1.
 		if (!isNew && page.url.searchParams.get('print') === '1') {
@@ -271,18 +273,22 @@
 <div class="space-y-8">
 	<div class="flex flex-wrap items-start justify-between gap-4">
 		<div>
-			<a class="text-sm text-muted-foreground hover:text-brand-700" href="/admin/quotes">← Quotes</a
+			<a class="text-sm text-muted-foreground hover:text-brand-700" href="/admin/quotes"
+				>{m.admin_quotes_back()}</a
 			>
 			<div class="mt-1 flex flex-wrap items-center gap-3">
 				<h1 class="text-2xl font-semibold tracking-tight text-foreground">
-					{isNew ? 'New quote' : data.quote.quoteNumber}
+					{isNew ? m.admin_quotes_new() : data.quote.quoteNumber}
 				</h1>
 			</div>
 			<p class="mt-1 text-sm text-muted-foreground">
 				{#if isNew}
-					Not yet saved — choose a client and add items, then create the quote.
+					{m.admin_quotes_new_intro()}
 				{:else}
-					{data.quote.client?.displayName} · created {formatDateTime(data.quote.createdAt)}
+					{m.admin_quotes_created_line({
+						name: data.quote.client?.displayName ?? '',
+						date: formatDateTime(data.quote.createdAt)
+					})}
 				{/if}
 			</p>
 		</div>
@@ -293,7 +299,7 @@
 				aria-pressed={previewOnly}
 				onclick={toggleFullPreview}
 			>
-				{previewOnly ? 'Exit full preview' : 'Full preview'}
+				{previewOnly ? m.admin_quotes_exit_preview() : m.admin_quotes_full_preview()}
 			</button>
 			<div class="relative" bind:this={downloadMenu}>
 				<button
@@ -322,7 +328,7 @@
 							<path d="M5 21h14" />
 						</svg>
 					{/if}
-					Download
+					{m.common_download()}
 					<svg
 						class="h-4 w-4 opacity-80"
 						viewBox="0 0 24 24"
@@ -344,17 +350,17 @@
 						<p
 							class="px-3 py-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase"
 						>
-							Download as
+							{m.admin_quotes_download_as()}
 						</p>
 						{#each downloadLanguages as option (option.value)}
 							<button
 								type="button"
 								role="menuitem"
-								title={option.hint}
+								title={option.hint()}
 								class="flex w-full items-center justify-between gap-2 rounded-brand px-3 py-2 text-left text-sm text-foreground transition hover:bg-surface-muted"
 								onclick={() => downloadIn(option.value)}
 							>
-								<span>{option.label}</span>
+								<span>{option.label()}</span>
 								<span class="text-xs text-muted-foreground">PDF</span>
 							</button>
 						{/each}
@@ -367,7 +373,7 @@
 					class="rounded-brand border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:border-danger hover:text-danger"
 					onclick={() => (pendingDelete = true)}
 				>
-					Delete
+					{m.common_delete()}
 				</button>
 			{/if}
 		</div>
@@ -408,7 +414,7 @@
 						<summary
 							class="flex cursor-pointer list-none items-center justify-between gap-2 px-5 py-4 text-sm font-semibold text-foreground [&::-webkit-details-marker]:hidden"
 						>
-							Convert to booking
+							{m.admin_quotes_convert()}
 							<svg
 								class="h-4 w-4 shrink-0 text-muted-foreground transition {convertOpen
 									? 'rotate-180'
@@ -427,12 +433,9 @@
 						<div class="border-t border-border p-5">
 							{#if data.quote.booking}
 								<p class="text-sm text-muted-foreground">
-									Already booked as
-									<a
-										class="text-brand-700 hover:underline"
-										href="/admin/bookings/{data.quote.booking.id}"
-										>{data.quote.booking.bookingNumber}</a
-									>.
+									{m.admin_quotes_already_booked({
+										number: data.quote.booking.bookingNumber
+									})}
 								</p>
 							{:else}
 								<form method="POST" action="?/convert" class="space-y-3" use:enhance>
@@ -440,7 +443,7 @@
 									<input type="hidden" name="quotedTotalTzs" value={data.quote.totalTzs} />
 									<div>
 										<label for="serviceId" class="block text-sm font-medium text-foreground"
-											>Service</label
+											>{m.common_service()}</label
 										>
 										<select
 											id="serviceId"
@@ -448,21 +451,21 @@
 											required
 											class="mt-1 block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 										>
-											<option value="">Select a service</option>
+											<option value="">{m.common_select_service()}</option>
 											{#each payload.services as service (service.id)}
 												<option value={service.id}>{service.name}</option>
 											{/each}
 										</select>
 										<p class="mt-1 text-xs text-muted-foreground">
-											This list comes from your service catalogue. To add or edit services, go to
-											<a class="text-brand-700 hover:underline" href="/admin/website/services"
-												>Website → Services</a
+											{m.admin_quotes_services_hint()}<a
+												class="text-brand-700 hover:underline"
+												href="/admin/website/services">{m.admin_quotes_services_link()}</a
 											>.
 										</p>
 									</div>
 									<div>
 										<label for="scheduledDate" class="block text-sm font-medium text-foreground"
-											>Scheduled date</label
+											>{m.admin_quotes_scheduled_date()}</label
 										>
 										<input
 											id="scheduledDate"
@@ -474,7 +477,7 @@
 									</div>
 									<div>
 										<label for="scheduledTime" class="block text-sm font-medium text-foreground"
-											>Scheduled time</label
+											>{m.admin_quotes_scheduled_time()}</label
 										>
 										<input
 											id="scheduledTime"
@@ -488,7 +491,7 @@
 										type="submit"
 										class="w-full rounded-brand bg-accent-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-700"
 									>
-										Create booking
+										{m.admin_quotes_create_booking()}
 									</button>
 								</form>
 							{/if}
@@ -503,7 +506,7 @@
 					<summary
 						class="flex cursor-pointer list-none items-center justify-between gap-2 px-5 py-4 text-sm font-semibold text-foreground [&::-webkit-details-marker]:hidden"
 					>
-						Line items
+						{m.admin_quotes_line_items()}
 						<svg
 							class="h-4 w-4 shrink-0 text-muted-foreground transition {lineItemsOpen
 								? 'rotate-180'
@@ -530,14 +533,14 @@
 									// Keep the entered line items; the default reset clears the inputs.
 									await update({ reset: false });
 									savingQuote = false;
-									if (result.type === 'success') toast.success('Quote updated.');
+									if (result.type === 'success') toast.success(m.admin_quotes_updated());
 								};
 							}}
 						>
 							<div class="grid gap-4 sm:grid-cols-2">
 								<div>
 									<label for="clientId" class="block text-sm font-medium text-foreground"
-										>Client</label
+										>{m.common_client()}</label
 									>
 									<select
 										id="clientId"
@@ -546,7 +549,7 @@
 										bind:value={clientId}
 										class="mt-1 block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 									>
-										<option value="">Select a client</option>
+										<option value="">{m.common_select_client()}</option>
 										{#each payload.clients as client (client.id)}
 											<option value={client.id}>{client.displayName}</option>
 										{/each}
@@ -554,7 +557,7 @@
 								</div>
 								<div>
 									<label for="validUntil" class="block text-sm font-medium text-foreground"
-										>Valid until</label
+										>{m.admin_quotes_valid_until()}</label
 									>
 									<input
 										id="validUntil"
@@ -578,11 +581,11 @@
 									class="inline-flex items-center gap-2 rounded-brand bg-accent-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-700 disabled:cursor-not-allowed disabled:opacity-70"
 								>
 									{#if savingQuote}<Spinner class="h-4 w-4" />{/if}
-									{isNew ? 'Create quote' : 'Save quote'}
+									{isNew ? m.admin_quotes_create() : m.admin_quotes_save()}
 								</button>
 								<dl class="text-right text-sm">
 									<div class="flex justify-end gap-6 text-base font-semibold">
-										<dt>Total</dt>
+										<dt>{m.common_total()}</dt>
 										<dd>{formatTzs(total)}</dd>
 									</div>
 								</dl>
@@ -598,7 +601,7 @@
 					<summary
 						class="flex cursor-pointer list-none items-center justify-between gap-2 px-5 py-4 text-sm font-semibold text-foreground [&::-webkit-details-marker]:hidden"
 					>
-						Terms & Conditions
+						{m.admin_quotes_terms_title()}
 						<svg
 							class="h-4 w-4 shrink-0 text-muted-foreground transition {termsOpen
 								? 'rotate-180'
@@ -618,7 +621,7 @@
 						<div
 							class="flex w-fit items-center rounded-pill border border-border bg-surface-muted p-0.5 text-xs"
 							role="group"
-							aria-label="Terms language"
+							aria-label={m.admin_quotes_terms_language()}
 						>
 							{#each termsLanguages as option (option.value)}
 								<button
@@ -629,13 +632,15 @@
 									aria-pressed={termsLang === option.value}
 									onclick={() => (termsLang = option.value)}
 								>
-									{option.label}
+									{option.label()}
 								</button>
 							{/each}
 						</div>
 						<div class="flex items-center justify-between">
 							<label for="terms" class="block text-sm font-medium text-foreground">
-								Terms & conditions ({termsLang === 'en' ? 'English' : 'Kiswahili'})
+								{m.admin_quotes_terms_lang_label({
+									language: termsLang === 'en' ? m.lang_en() : m.lang_sw()
+								})}
 							</label>
 							<span class="text-xs text-muted-foreground"
 								>{terms[termsLang].length}/{TERMS_MAX}</span
@@ -646,11 +651,11 @@
 							bind:value={terms[termsLang]}
 							rows="8"
 							maxlength={TERMS_MAX}
-							placeholder="All rates quoted are valid for 15 days."
+							placeholder={m.admin_quotes_terms_placeholder()}
 							class="block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 						></textarea>
 						<p class="text-xs text-muted-foreground">
-							Shown in the footer of the quote document. Each language keeps its own text.
+							{m.admin_quotes_terms_hint_doc()}
 						</p>
 					</div>
 				</details>
@@ -677,7 +682,7 @@
 			class="rounded-brand border border-danger/30 bg-danger/5 px-3 py-2 text-sm text-danger"
 			role="alert"
 		>
-			Could not load the quote editor. Please refresh the page.
+			{m.admin_quotes_editor_error()}
 		</p>
 	{/await}
 </div>
@@ -690,7 +695,7 @@
 		return async ({ result, update }) => {
 			if (result.type === 'redirect') {
 				pendingDelete = false;
-				toast.success('Quote deleted.');
+				toast.success(m.admin_quotes_deleted());
 				await goto(result.location);
 				return;
 			}
@@ -705,9 +710,10 @@
 <ConfirmDialog
 	open={pendingDelete}
 	loading={deletingQuote}
-	title="Delete quote?"
-	message="Are you sure you want to delete this quote? This cannot be undone."
-	confirmLabel="Delete quote"
+	title={m.admin_quotes_delete_title()}
+	message={m.admin_quotes_delete_message({ number: m.admin_quotes_col_quote() })}
+	confirmLabel={m.admin_quotes_delete_confirm()}
+	cancelLabel={m.common_cancel()}
 	oncancel={() => (pendingDelete = false)}
 	onconfirm={() => deleteForm?.requestSubmit()}
 />

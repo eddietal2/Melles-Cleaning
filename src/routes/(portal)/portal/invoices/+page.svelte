@@ -2,7 +2,7 @@
 	import type { PageProps } from './$types';
 	import { formatDate } from '$lib/utils/dates';
 	import { formatTzs } from '$lib/utils/currency';
-	import { INVOICE_STATUS_LABELS, badgeClass, invoiceStatusTone } from '$lib/utils/status';
+	import { badgeClass, invoiceStatusLabel, invoiceStatusTone } from '$lib/utils/status';
 
 	let { data }: PageProps = $props();
 
@@ -29,7 +29,7 @@
 						<div class="flex items-center gap-2">
 							<h2 class="text-sm font-semibold text-foreground">{invoice.invoiceNumber}</h2>
 							<span class={badgeClass(invoiceStatusTone(invoice.status))}>
-								{INVOICE_STATUS_LABELS[invoice.status]}
+								{invoiceStatusLabel(invoice.status)}
 							</span>
 						</div>
 						<p class="mt-1 text-xs text-muted-foreground">

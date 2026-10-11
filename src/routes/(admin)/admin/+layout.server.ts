@@ -14,5 +14,5 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 		throw error(403, 'You do not have access to the admin area.');
 	}
 
-	return { user: locals.user };
+	return { user: locals.user, locale: locals.locale };
 };

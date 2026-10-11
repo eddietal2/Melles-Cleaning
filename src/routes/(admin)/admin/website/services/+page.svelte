@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { PageProps } from './$types';
+	import * as m from '$lib/paraglide/messages.js';
 
 	let { data, form }: PageProps = $props();
 
@@ -11,11 +12,13 @@
 	<div class="flex flex-wrap items-start justify-between gap-4">
 		<div>
 			<a class="text-sm text-muted-foreground hover:text-brand-700" href="/admin/website"
-				>← Website content</a
+				>{m.admin_website_back()}</a
 			>
-			<h1 class="mt-1 text-2xl font-semibold tracking-tight text-foreground">Services & pricing</h1>
+			<h1 class="mt-1 text-2xl font-semibold tracking-tight text-foreground">
+				{m.admin_website_services_title()}
+			</h1>
 			<p class="mt-1 text-sm text-muted-foreground">
-				Only active services appear on the public website.
+				{m.admin_services_intro()}
 			</p>
 		</div>
 	</div>
@@ -36,13 +39,15 @@
 		use:enhance
 	>
 		<div class="min-w-56 flex-1">
-			<label for="name" class="block text-sm font-medium text-foreground">New service name</label>
+			<label for="name" class="block text-sm font-medium text-foreground"
+				>{m.admin_services_new_name()}</label
+			>
 			<input
 				id="name"
 				name="name"
 				type="text"
 				required
-				placeholder="e.g. Post-Construction Cleaning"
+				placeholder={m.admin_services_new_name_placeholder()}
 				class="mt-1 block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 			/>
 		</div>
@@ -50,7 +55,7 @@
 			type="submit"
 			class="rounded-brand bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700"
 		>
-			Add service
+			{m.admin_services_add()}
 		</button>
 	</form>
 
@@ -67,14 +72,14 @@
 								? 'bg-success/10 text-success'
 								: 'bg-surface-muted text-muted-foreground'}"
 						>
-							{service.isActive ? 'Visible' : 'Hidden'}
+							{service.isActive ? m.common_visible() : m.common_hidden()}
 						</span>
 					</div>
 					<p class="mt-0.5 truncate text-xs text-muted-foreground">
-						/{service.slug} · {service._count.pricingPackages} pricing package{service._count
-							.pricingPackages === 1
-							? ''
-							: 's'}
+						/{service.slug} · {service._count.pricingPackages}
+						{service._count.pricingPackages === 1
+							? m.admin_services_packages_one()
+							: m.admin_services_packages_many()}
 					</p>
 				</div>
 
@@ -82,7 +87,7 @@
 					<a
 						href="/admin/website/services/{service.id}"
 						class="rounded-brand border border-border px-3 py-1.5 text-xs font-medium text-foreground transition hover:border-brand-500 hover:text-brand-700"
-						>Edit</a
+						>{m.common_edit()}</a
 					>
 
 					<form method="POST" action="?/toggleActive" use:enhance>
@@ -92,7 +97,7 @@
 							type="submit"
 							class="rounded-brand border border-border px-3 py-1.5 text-xs font-medium text-foreground transition hover:border-brand-500 hover:text-brand-700"
 						>
-							{service.isActive ? 'Hide' : 'Publish'}
+							{service.isActive ? m.common_hide() : m.common_publish()}
 						</button>
 					</form>
 
@@ -102,7 +107,7 @@
 							type="submit"
 							class="rounded-brand border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:border-danger hover:text-danger"
 						>
-							Delete
+							{m.common_delete()}
 						</button>
 					</form>
 				</div>

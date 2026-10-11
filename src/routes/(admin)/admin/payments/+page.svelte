@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { PageProps } from './$types';
+	import * as m from '$lib/paraglide/messages.js';
 	import { formatDateTime } from '$lib/utils/dates';
 	import { formatTzs } from '$lib/utils/currency';
-	import { PAYMENT_METHOD_LABELS } from '$lib/utils/status';
+	import { PAYMENT_METHOD_CODES, paymentMethodLabel } from '$lib/utils/status';
 	import TableSkeleton from '$lib/components/ui/table-skeleton.svelte';
 
 	let { data, form }: PageProps = $props();
@@ -18,9 +19,11 @@
 
 <div class="space-y-8">
 	<div>
-		<h1 class="text-2xl font-semibold tracking-tight text-foreground">Payments</h1>
+		<h1 class="text-2xl font-semibold tracking-tight text-foreground">
+			{m.admin_payments_title()}
+		</h1>
 		<p class="mt-1 text-sm text-muted-foreground">
-			Cash and mobile-money receipts. Recording a payment automatically reconciles its invoice.
+			{m.admin_payments_intro()}
 		</p>
 	</div>
 
@@ -29,7 +32,7 @@
 	{:then payload}
 		<details class="rounded-brand border border-border bg-background shadow-card" open>
 			<summary class="cursor-pointer px-5 py-4 text-sm font-semibold text-foreground"
-				>Record a payment</summary
+				>{m.admin_invoices_record_payment_heading()}</summary
 			>
 			<form
 				method="POST"
@@ -38,19 +41,23 @@
 				use:enhance
 			>
 				<div class="sm:col-span-2">
-					<label for="invoiceId" class="block text-sm font-medium text-foreground">Invoice</label>
+					<label for="invoiceId" class="block text-sm font-medium text-foreground"
+						>{m.common_invoice()}</label
+					>
 					<select
 						id="invoiceId"
 						name="invoiceId"
 						required
 						class="mt-1 block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 					>
-						<option value="">Select an open invoice</option>
+						<option value="">{m.admin_payments_select_invoice()}</option>
 						{#each payload.openInvoices as invoice (invoice.id)}
 							<option value={invoice.id}>
-								{invoice.invoiceNumber} · {invoice.client.displayName} · balance {formatTzs(
-									balanceOf(invoice)
-								)}
+								{m.admin_payments_invoice_option({
+									number: invoice.invoiceNumber,
+									client: invoice.client.displayName,
+									amount: formatTzs(balanceOf(invoice))
+								})}
 							</option>
 						{/each}
 					</select>
@@ -58,7 +65,7 @@
 				</div>
 				<div>
 					<label for="amountTzs" class="block text-sm font-medium text-foreground"
-						>Amount (TZS)</label
+						>{m.common_amount_tzs()}</label
 					>
 					<input
 						id="amountTzs"
@@ -72,29 +79,33 @@
 					{#if errors.amountTzs}<p class="mt-1 text-xs text-danger">{errors.amountTzs}</p>{/if}
 				</div>
 				<div>
-					<label for="method" class="block text-sm font-medium text-foreground">Method</label>
+					<label for="method" class="block text-sm font-medium text-foreground"
+						>{m.common_method()}</label
+					>
 					<select
 						id="method"
 						name="method"
 						class="mt-1 block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 					>
-						{#each Object.entries(PAYMENT_METHOD_LABELS) as [value, label] (value)}
-							<option {value}>{label}</option>
+						{#each PAYMENT_METHOD_CODES as value (value)}
+							<option {value}>{paymentMethodLabel(value)}</option>
 						{/each}
 					</select>
 				</div>
 				<div>
-					<label for="reference" class="block text-sm font-medium text-foreground">Reference</label>
+					<label for="reference" class="block text-sm font-medium text-foreground"
+						>{m.common_reference()}</label
+					>
 					<input
 						id="reference"
 						name="reference"
-						placeholder="e.g. M-Pesa code"
+						placeholder={m.admin_payments_reference_placeholder()}
 						class="mt-1 block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 					/>
 				</div>
 				<div>
 					<label for="receivedAt" class="block text-sm font-medium text-foreground"
-						>Received on</label
+						>{m.admin_payments_received_on()}</label
 					>
 					<input
 						id="receivedAt"
@@ -108,7 +119,7 @@
 						type="submit"
 						class="rounded-brand bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700"
 					>
-						Record payment
+						{m.admin_invoices_record_payment()}
 					</button>
 				</div>
 			</form>
@@ -120,12 +131,12 @@
 					class="bg-surface-muted text-left text-xs tracking-wide text-muted-foreground uppercase"
 				>
 					<tr>
-						<th class="px-5 py-3 font-medium">Received</th>
-						<th class="px-5 py-3 font-medium">Invoice</th>
-						<th class="px-5 py-3 font-medium">Client</th>
-						<th class="px-5 py-3 font-medium">Method</th>
-						<th class="px-5 py-3 font-medium">Reference</th>
-						<th class="px-5 py-3 font-medium">Amount</th>
+						<th class="px-5 py-3 font-medium">{m.admin_payments_col_received()}</th>
+						<th class="px-5 py-3 font-medium">{m.common_invoice()}</th>
+						<th class="px-5 py-3 font-medium">{m.common_client()}</th>
+						<th class="px-5 py-3 font-medium">{m.common_method()}</th>
+						<th class="px-5 py-3 font-medium">{m.common_reference()}</th>
+						<th class="px-5 py-3 font-medium">{m.common_amount()}</th>
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-border">
@@ -139,17 +150,16 @@
 								>
 							</td>
 							<td class="px-5 py-3 text-muted-foreground">{payment.invoice.client.displayName}</td>
-							<td class="px-5 py-3 text-muted-foreground"
-								>{PAYMENT_METHOD_LABELS[payment.method]}</td
-							>
+							<td class="px-5 py-3 text-muted-foreground">{paymentMethodLabel(payment.method)}</td>
 							<td class="px-5 py-3 text-muted-foreground">{payment.reference ?? '—'}</td>
 							<td class="px-5 py-3 font-medium text-foreground">{formatTzs(payment.amountTzs)}</td>
 						</tr>
 					{:else}
-						<tr
-							><td class="px-5 py-6 text-muted-foreground" colspan="6">No payments recorded.</td
-							></tr
-						>
+						<tr>
+							<td class="px-5 py-6 text-muted-foreground" colspan="6">
+								{m.admin_invoices_no_payments()}
+							</td>
+						</tr>
 					{/each}
 				</tbody>
 			</table>
@@ -159,7 +169,7 @@
 			class="rounded-brand border border-danger/30 bg-danger/5 px-3 py-2 text-sm text-danger"
 			role="alert"
 		>
-			Could not load payments. Please refresh the page.
+			{m.admin_payments_error()}
 		</p>
 	{/await}
 </div>

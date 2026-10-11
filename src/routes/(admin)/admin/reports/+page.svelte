@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
+	import * as m from '$lib/paraglide/messages.js';
 	import { formatTzs } from '$lib/utils/currency';
 	import Skeleton from '$lib/components/ui/skeleton.svelte';
 
@@ -10,9 +11,9 @@
 
 <div class="space-y-8">
 	<div>
-		<h1 class="text-2xl font-semibold tracking-tight text-foreground">Reports</h1>
+		<h1 class="text-2xl font-semibold tracking-tight text-foreground">{m.admin_reports_title()}</h1>
 		<p class="mt-1 text-sm text-muted-foreground">
-			Revenue, retention, job value and team utilisation, all in TZS and EAT.
+			{m.admin_reports_intro()}
 		</p>
 	</div>
 
@@ -51,20 +52,29 @@
 
 		<div class="grid gap-4 sm:grid-cols-3">
 			<div class="rounded-brand border border-border bg-background p-5 shadow-card">
-				<p class="text-xs tracking-wide text-muted-foreground uppercase">Average job value</p>
+				<p class="text-xs tracking-wide text-muted-foreground uppercase">
+					{m.admin_reports_avg_job()}
+				</p>
 				<p class="mt-2 text-2xl font-semibold text-foreground">
 					{formatTzs(reports.averageJobValueTzs)}
 				</p>
 			</div>
 			<div class="rounded-brand border border-border bg-background p-5 shadow-card">
-				<p class="text-xs tracking-wide text-muted-foreground uppercase">Client retention</p>
+				<p class="text-xs tracking-wide text-muted-foreground uppercase">
+					{m.admin_reports_retention()}
+				</p>
 				<p class="mt-2 text-2xl font-semibold text-foreground">{reports.retentionPercent}%</p>
 				<p class="text-xs text-muted-foreground">
-					{reports.recurringClients} of {reports.activeClients} active clients repeat
+					{m.admin_reports_retention_sub({
+						recurring: reports.recurringClients,
+						active: reports.activeClients
+					})}
 				</p>
 			</div>
 			<div class="rounded-brand border border-border bg-background p-5 shadow-card">
-				<p class="text-xs tracking-wide text-muted-foreground uppercase">Outstanding balance</p>
+				<p class="text-xs tracking-wide text-muted-foreground uppercase">
+					{m.admin_reports_outstanding()}
+				</p>
 				<p class="mt-2 text-2xl font-semibold text-foreground">
 					{formatTzs(
 						reports.aging.current +
@@ -77,7 +87,7 @@
 		</div>
 
 		<section class="rounded-brand border border-border bg-background p-5 shadow-card">
-			<h2 class="text-sm font-semibold text-foreground">Revenue by month</h2>
+			<h2 class="text-sm font-semibold text-foreground">{m.admin_reports_revenue_month()}</h2>
 			<div class="mt-4 flex items-end gap-3 sm:gap-6">
 				{#each reports.revenueByMonth as month (month.key)}
 					<div class="flex flex-1 flex-col items-center gap-2">
@@ -97,13 +107,17 @@
 
 		<div class="grid gap-6 lg:grid-cols-2">
 			<section class="rounded-brand border border-border bg-background p-5 shadow-card">
-				<h2 class="text-sm font-semibold text-foreground">Invoiced by segment</h2>
+				<h2 class="text-sm font-semibold text-foreground">{m.admin_reports_invoiced_segment()}</h2>
 				<div class="mt-4 space-y-3">
-					{#each [['RESIDENTIAL', 'Residential'], ['COMMERCIAL', 'Commercial']] as const as [key, label] (key)}
+					{#each ['RESIDENTIAL', 'COMMERCIAL'] as const as key (key)}
 						{@const value = reports.segmentTotals[key]}
 						<div>
 							<div class="flex justify-between text-sm">
-								<span class="text-foreground">{label}</span>
+								<span class="text-foreground"
+									>{key === 'RESIDENTIAL'
+										? m.status_client_type_residential()
+										: m.status_client_type_commercial()}</span
+								>
 								<span class="text-muted-foreground">{formatTzs(value)}</span>
 							</div>
 							<div class="mt-1 h-2 rounded-pill bg-surface-muted">
@@ -118,22 +132,22 @@
 			</section>
 
 			<section class="rounded-brand border border-border bg-background p-5 shadow-card">
-				<h2 class="text-sm font-semibold text-foreground">Invoice aging</h2>
+				<h2 class="text-sm font-semibold text-foreground">{m.admin_reports_aging()}</h2>
 				<dl class="mt-4 space-y-2 text-sm">
 					<div class="flex justify-between">
-						<dt class="text-muted-foreground">Current</dt>
+						<dt class="text-muted-foreground">{m.admin_reports_aging_current()}</dt>
 						<dd class="text-foreground">{formatTzs(reports.aging.current)}</dd>
 					</div>
 					<div class="flex justify-between">
-						<dt class="text-muted-foreground">1–30 days</dt>
+						<dt class="text-muted-foreground">{m.admin_reports_aging_days30()}</dt>
 						<dd class="text-foreground">{formatTzs(reports.aging.days30)}</dd>
 					</div>
 					<div class="flex justify-between">
-						<dt class="text-muted-foreground">31–60 days</dt>
+						<dt class="text-muted-foreground">{m.admin_reports_aging_days60()}</dt>
 						<dd class="text-foreground">{formatTzs(reports.aging.days60)}</dd>
 					</div>
 					<div class="flex justify-between">
-						<dt class="text-muted-foreground">90+ days</dt>
+						<dt class="text-muted-foreground">{m.admin_reports_aging_days90()}</dt>
 						<dd class="text-danger">{formatTzs(reports.aging.days90Plus)}</dd>
 					</div>
 				</dl>
@@ -141,17 +155,17 @@
 		</div>
 
 		<section class="rounded-brand border border-border bg-background p-5 shadow-card">
-			<h2 class="text-sm font-semibold text-foreground">Team utilisation (last 30 days)</h2>
+			<h2 class="text-sm font-semibold text-foreground">{m.admin_reports_team()}</h2>
 			<ul class="mt-4 space-y-2 text-sm">
 				{#each reports.teamUtilisation as member (member.name)}
 					<li class="flex items-center justify-between">
 						<span class="text-foreground">{member.name}</span>
-						<span class="text-muted-foreground"
-							>{member.jobs} job{member.jobs === 1 ? '' : 's'}</span
-						>
+						<span class="text-muted-foreground">
+							{m.admin_reports_team_jobs({ count: member.jobs })}
+						</span>
 					</li>
 				{:else}
-					<li class="text-muted-foreground">No assignments recorded yet.</li>
+					<li class="text-muted-foreground">{m.admin_reports_no_team()}</li>
 				{/each}
 			</ul>
 		</section>
@@ -160,7 +174,7 @@
 			class="rounded-brand border border-danger/30 bg-danger/5 px-3 py-2 text-sm text-danger"
 			role="alert"
 		>
-			Could not load the reports. Please refresh the page.
+			{m.admin_reports_error()}
 		</p>
 	{/await}
 </div>

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { PageProps } from './$types';
+	import * as m from '$lib/paraglide/messages.js';
 
 	let { data, form }: PageProps = $props();
 
@@ -13,12 +14,12 @@
 <div class="space-y-8">
 	<div>
 		<a class="text-sm text-muted-foreground hover:text-brand-700" href="/admin/website"
-			>← Website content</a
+			>{m.admin_website_back()}</a
 		>
-		<h1 class="mt-1 text-2xl font-semibold tracking-tight text-foreground">FAQ</h1>
-		<p class="mt-1 text-sm text-muted-foreground">
-			Published questions appear on service pages and the site.
-		</p>
+		<h1 class="mt-1 text-2xl font-semibold tracking-tight text-foreground">
+			{m.admin_website_faq_title()}
+		</h1>
+		<p class="mt-1 text-sm text-muted-foreground">{m.admin_faq_intro()}</p>
 	</div>
 
 	{#if message}
@@ -36,20 +37,20 @@
 		class="space-y-4 rounded-brand border border-border bg-background p-5 shadow-card"
 		use:enhance
 	>
-		<p class="text-sm font-semibold text-foreground">Add a question</p>
+		<p class="text-sm font-semibold text-foreground">{m.admin_faq_add_heading()}</p>
 		<div>
-			<label for="question" class={labelClass}>Question</label>
+			<label for="question" class={labelClass}>{m.common_question()}</label>
 			<input id="question" name="question" type="text" required class={inputClass} />
 		</div>
 		<div>
-			<label for="answer" class={labelClass}>Answer</label>
+			<label for="answer" class={labelClass}>{m.common_answer()}</label>
 			<textarea id="answer" name="answer" rows="3" required class={inputClass}></textarea>
 		</div>
 		<button
 			type="submit"
 			class="rounded-brand bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700"
 		>
-			Add question
+			{m.admin_faq_add()}
 		</button>
 	</form>
 
@@ -59,7 +60,7 @@
 				<form method="POST" action="?/update" class="space-y-3" use:enhance>
 					<input type="hidden" name="id" value={item.id} />
 					<div>
-						<label for="q-{item.id}" class={labelClass}>Question</label>
+						<label for="q-{item.id}" class={labelClass}>{m.common_question()}</label>
 						<input
 							id="q-{item.id}"
 							name="question"
@@ -69,14 +70,14 @@
 						/>
 					</div>
 					<div>
-						<label for="a-{item.id}" class={labelClass}>Answer</label>
+						<label for="a-{item.id}" class={labelClass}>{m.common_answer()}</label>
 						<textarea id="a-{item.id}" name="answer" rows="3" class={inputClass}
 							>{item.answer}</textarea
 						>
 					</div>
 					<div class="flex flex-wrap items-center justify-between gap-3">
 						<label class="flex items-center gap-2 text-sm text-muted-foreground">
-							Order
+							{m.common_order()}
 							<input
 								name="sortOrder"
 								type="number"
@@ -87,7 +88,7 @@
 						<button
 							type="submit"
 							class="rounded-brand bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-brand-700"
-							>Save</button
+							>{m.common_save()}</button
 						>
 					</div>
 				</form>
@@ -102,14 +103,15 @@
 								? 'bg-success/10 text-success'
 								: 'bg-surface-muted text-muted-foreground'}"
 						>
-							{item.isPublished ? 'Published' : 'Draft'}
+							{item.isPublished ? m.common_published() : m.common_draft()}
 						</button>
 					</form>
 					<form method="POST" action="?/delete" use:enhance>
 						<input type="hidden" name="id" value={item.id} />
 						<button
 							type="submit"
-							class="text-xs font-medium text-muted-foreground hover:text-danger">Delete</button
+							class="text-xs font-medium text-muted-foreground hover:text-danger"
+							>{m.common_delete()}</button
 						>
 					</form>
 				</div>

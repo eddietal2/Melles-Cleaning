@@ -2,6 +2,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import { enhance } from '$app/forms';
 	import type { PageProps } from './$types';
+	import * as m from '$lib/paraglide/messages.js';
 
 	let { data }: PageProps = $props();
 
@@ -19,7 +20,7 @@
 
 		const file = fileInput?.files?.[0];
 		if (!file) {
-			uploadError = 'Choose an image first.';
+			uploadError = m.admin_media_error_choose();
 			return;
 		}
 
@@ -34,7 +35,7 @@
 
 			if (!presign.ok) {
 				const info = await presign.json().catch(() => null);
-				throw new Error(info?.message ?? 'Could not start the upload.');
+				throw new Error(info?.message ?? m.admin_media_error_start());
 			}
 
 			const { uploadUrl, key } = (await presign.json()) as {
@@ -49,7 +50,7 @@
 			});
 
 			if (!put.ok) {
-				throw new Error('Uploading to storage failed.');
+				throw new Error(m.admin_media_error_storage());
 			}
 
 			const altText = (document.getElementById('altText') as HTMLInputElement | null)?.value ?? '';
@@ -62,17 +63,17 @@
 			const response = await fetch('?/register', { method: 'POST', body: register });
 
 			if (!response.ok) {
-				throw new Error('Saving the image failed.');
+				throw new Error(m.admin_media_error_save());
 			}
 
 			if (fileInput) fileInput.value = '';
 			const altField = document.getElementById('altText') as HTMLInputElement | null;
 			if (altField) altField.value = '';
 
-			uploadNote = 'Image uploaded.';
+			uploadNote = m.admin_media_uploaded();
 			await invalidateAll();
 		} catch (error) {
-			uploadError = error instanceof Error ? error.message : 'Upload failed.';
+			uploadError = error instanceof Error ? error.message : m.admin_media_error_failed();
 		} finally {
 			uploading = false;
 		}
@@ -81,30 +82,30 @@
 
 <div class="space-y-8">
 	<div>
-		<h1 class="text-2xl font-semibold tracking-tight text-foreground">Media library</h1>
+		<h1 class="text-2xl font-semibold tracking-tight text-foreground">{m.admin_media_title()}</h1>
 		<p class="mt-1 text-sm text-muted-foreground">
-			Upload photos to Cloudflare R2, then choose which ones appear in the public gallery.
+			{m.admin_media_intro()}
 		</p>
 	</div>
 
 	{#if !data.r2Configured}
 		<div class="rounded-brand border border-warning/30 bg-warning/5 p-5 text-sm text-foreground">
-			<p class="font-semibold">Media storage is not configured</p>
+			<p class="font-semibold">{m.admin_media_not_configured()}</p>
 			<p class="mt-1 text-muted-foreground">
-				Add <code class="rounded bg-surface-muted px-1">R2_ACCOUNT_ID</code>,
-				<code class="rounded bg-surface-muted px-1">R2_ACCESS_KEY_ID</code>,
-				<code class="rounded bg-surface-muted px-1">R2_SECRET_ACCESS_KEY</code> and
-				<code class="rounded bg-surface-muted px-1">R2_PUBLIC_URL</code> to your environment to enable
-				uploads.
+				{m.admin_media_config_hint({
+					a: 'R2_ACCOUNT_ID',
+					b: 'R2_ACCESS_KEY_ID',
+					c: 'R2_SECRET_ACCESS_KEY',
+					d: 'R2_PUBLIC_URL'
+				})}
 			</p>
 		</div>
 	{:else}
 		{#if !data.publicUrlConfigured}
 			<div class="rounded-brand border border-warning/30 bg-warning/5 p-5 text-sm">
-				<p class="font-semibold text-foreground">No public URL configured</p>
+				<p class="font-semibold text-foreground">{m.admin_media_no_public_url()}</p>
 				<p class="mt-1 text-muted-foreground">
-					Set <code class="rounded bg-surface-muted px-1">R2_PUBLIC_URL</code> so uploaded images can
-					be displayed on the website.
+					{m.admin_media_public_url_hint({ url: 'R2_PUBLIC_URL' })}
 				</p>
 			</div>
 		{/if}
@@ -113,11 +114,13 @@
 			class="space-y-4 rounded-brand border border-border bg-background p-6 shadow-card"
 			onsubmit={handleUpload}
 		>
-			<p class="text-sm font-semibold text-foreground">Upload an image</p>
+			<p class="text-sm font-semibold text-foreground">{m.admin_media_upload_heading()}</p>
 
 			<div class="grid gap-4 sm:grid-cols-2">
 				<div>
-					<label for="file" class="block text-sm font-medium text-foreground">Image file</label>
+					<label for="file" class="block text-sm font-medium text-foreground"
+						>{m.admin_media_file()}</label
+					>
 					<input
 						id="file"
 						bind:this={fileInput}
@@ -128,12 +131,13 @@
 				</div>
 				<div>
 					<label for="altText" class="block text-sm font-medium text-foreground"
-						>Alt text <span class="text-muted-foreground">(accessibility)</span></label
+						>{m.admin_media_alt()}
+						<span class="text-muted-foreground">{m.admin_media_alt_hint()}</span></label
 					>
 					<input
 						id="altText"
 						type="text"
-						placeholder="e.g. Cleaned living room in Dodoma"
+						placeholder={m.admin_media_alt_placeholder()}
 						class="mt-1 block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 					/>
 				</div>
@@ -151,16 +155,16 @@
 				disabled={uploading}
 				class="rounded-brand bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:opacity-60"
 			>
-				{uploading ? 'Uploading…' : 'Upload image'}
+				{uploading ? m.admin_media_uploading() : m.admin_media_upload()}
 			</button>
 		</form>
 	{/if}
 
 	<div>
-		<h2 class="text-lg font-semibold text-foreground">Library</h2>
+		<h2 class="text-lg font-semibold text-foreground">{m.admin_media_library()}</h2>
 
 		{#if data.media.length === 0}
-			<p class="mt-2 text-sm text-muted-foreground">No images uploaded yet.</p>
+			<p class="mt-2 text-sm text-muted-foreground">{m.admin_media_empty()}</p>
 		{:else}
 			<ul class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 				{#each data.media as asset (asset.id)}
@@ -168,7 +172,7 @@
 					<li class="overflow-hidden rounded-brand border border-border bg-background shadow-card">
 						<img
 							src={asset.url}
-							alt={asset.altText ?? 'Uploaded image'}
+							alt={asset.altText ?? m.admin_media_image_alt()}
 							class="aspect-4/3 w-full object-cover"
 							loading="lazy"
 						/>
@@ -184,7 +188,7 @@
 										type="submit"
 										class="rounded-brand border border-border px-3 py-1.5 text-xs font-medium text-foreground transition hover:border-brand-500 hover:text-brand-700"
 									>
-										{galleryItem ? 'Remove from gallery' : 'Add to gallery'}
+										{galleryItem ? m.admin_media_remove_gallery() : m.admin_media_add_gallery()}
 									</button>
 								</form>
 
@@ -202,7 +206,7 @@
 												? 'border-success/40 text-success'
 												: 'border-border text-muted-foreground hover:text-foreground'}"
 										>
-											{galleryItem.isPublished ? 'Published' : 'Draft'}
+											{galleryItem.isPublished ? m.common_published() : m.common_draft()}
 										</button>
 									</form>
 								{/if}
@@ -213,7 +217,7 @@
 										type="submit"
 										class="rounded-brand border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:border-danger hover:text-danger"
 									>
-										Delete
+										{m.common_delete()}
 									</button>
 								</form>
 							</div>
