@@ -32,6 +32,12 @@
 	const fieldClass =
 		'mt-1 block w-full rounded-brand border-border bg-slate-200 shadow-sm focus:border-brand-600 focus:ring-brand-600 dark:bg-slate-900';
 
+	/** True when every item accordion is expanded. */
+	const allOpen = $derived(items.length > 0 && items.every((item) => item.open));
+
+	/** The item awaiting an inline remove confirmation, or null when idle. */
+	let pendingRemoveId = $state<number | null>(null);
+
 	function addItem() {
 		if (items.length >= maxItems) return;
 		const nextId = items.reduce((max, item) => Math.max(max, item.id), -1) + 1;
@@ -55,6 +61,18 @@
 		items = items.filter((item) => item.id !== id);
 	}
 
+	/** Confirms the inline removal of an item. */
+	function confirmRemove(id: number) {
+		pendingRemoveId = null;
+		removeItem(id);
+	}
+
+	/** Collapse every item, or expand them all if they are already open. */
+	function toggleAll() {
+		const shouldOpen = !allOpen;
+		for (const item of items) item.open = shouldOpen;
+	}
+
 	/** Formats whole-TZS amounts with thousand separators, e.g. 1000 -> "1,000". */
 	const amountFormatter = new Intl.NumberFormat('en-US');
 	function formatAmount(value: number): string {
@@ -74,21 +92,31 @@
 <div class="space-y-3">
 	<div
 		class="flex items-center justify-between gap-2 {sticky
-			? 'sticky top-0 z-10 -mx-5 -mt-5 border-b border-border bg-background px-5 pt-5 pb-3'
+			? 'sticky -top-1 z-10 -mx-5 border-b border-border bg-background px-5 py-3'
 			: ''}"
 	>
 		<h3 class="text-sm font-semibold text-foreground">
 			Items
 			<span class="ml-1 text-xs font-normal text-muted-foreground">{items.length}/{maxItems}</span>
 		</h3>
-		<button
-			type="button"
-			class="rounded-brand border border-brand-500 px-3 py-1.5 text-xs font-medium text-brand-700 transition hover:border-brand-600 hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-50"
-			disabled={items.length >= maxItems}
-			onclick={addItem}
-		>
-			Add item
-		</button>
+		<div class="flex items-center gap-2">
+			<button
+				type="button"
+				class="rounded-brand border border-border px-3 py-1.5 text-xs font-medium text-foreground transition hover:bg-surface-muted"
+				aria-pressed={allOpen}
+				onclick={toggleAll}
+			>
+				{allOpen ? 'Collapse all' : 'Expand all'}
+			</button>
+			<button
+				type="button"
+				class="rounded-brand border border-brand-500 px-3 py-1.5 text-xs font-medium text-brand-700 transition hover:border-brand-600 hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-50"
+				disabled={items.length >= maxItems}
+				onclick={addItem}
+			>
+				Add item
+			</button>
+		</div>
 	</div>
 
 	{#each items as item, index (item.id)}
@@ -126,13 +154,33 @@
 					</svg>
 				</button>
 				{#if items.length > 1}
-					<button
-						type="button"
-						class="text-xs text-muted-foreground transition hover:text-danger"
-						onclick={() => removeItem(item.id)}
-					>
-						Remove
-					</button>
+					{#if pendingRemoveId === item.id}
+						<span class="flex shrink-0 items-center gap-2 text-xs">
+							<span class="text-muted-foreground">Are you sure?</span>
+							<button
+								type="button"
+								class="font-semibold text-danger transition hover:underline"
+								onclick={() => confirmRemove(item.id)}
+							>
+								Yes
+							</button>
+							<button
+								type="button"
+								class="font-medium text-muted-foreground transition hover:text-foreground"
+								onclick={() => (pendingRemoveId = null)}
+							>
+								No
+							</button>
+						</span>
+					{:else}
+						<button
+							type="button"
+							class="shrink-0 text-xs text-muted-foreground transition hover:text-danger"
+							onclick={() => (pendingRemoveId = item.id)}
+						>
+							Remove
+						</button>
+					{/if}
 				{/if}
 			</div>
 			<div class="space-y-3 border-t border-border p-3 {item.open ? '' : 'hidden'}">

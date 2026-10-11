@@ -104,8 +104,10 @@
 			</div>
 		</header>
 
-		<main class="flex-1 overflow-y-auto p-5 lg:p-8">
-			{@render children()}
+		<main class="flex-1 overflow-y-auto">
+			<div class="p-5 lg:p-8">
+				{@render children()}
+			</div>
 		</main>
 	</div>
 </div>

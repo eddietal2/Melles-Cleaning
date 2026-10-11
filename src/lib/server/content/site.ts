@@ -1,3 +1,4 @@
+import { DEFAULT_QUOTE_TERMS } from '$lib/schemas/quote';
 import { db } from '../db';
 
 export interface SiteSettings {
@@ -12,6 +13,9 @@ export interface SiteSettings {
 	notificationEmail: string;
 	referralCreditTzs: number;
 	firstCleanDiscountPercent: number;
+	/** Default quote terms, authored per language and reused for new quotes. */
+	quoteTermsEn: string;
+	quoteTermsSw: string;
 }
 
 /**
@@ -29,7 +33,9 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
 	address: 'Dodoma, Tanzania',
 	notificationEmail: '',
 	referralCreditTzs: 10000,
-	firstCleanDiscountPercent: 20
+	firstCleanDiscountPercent: 20,
+	quoteTermsEn: DEFAULT_QUOTE_TERMS.en,
+	quoteTermsSw: DEFAULT_QUOTE_TERMS.sw
 };
 
 function toNumber(value: string | undefined, fallback: number): number {
@@ -60,7 +66,9 @@ export async function getSiteSettings(): Promise<SiteSettings> {
 		firstCleanDiscountPercent: toNumber(
 			map.get('first_clean_discount_percent'),
 			DEFAULT_SITE_SETTINGS.firstCleanDiscountPercent
-		)
+		),
+		quoteTermsEn: map.get('quote_terms_en') ?? DEFAULT_SITE_SETTINGS.quoteTermsEn,
+		quoteTermsSw: map.get('quote_terms_sw') ?? DEFAULT_SITE_SETTINGS.quoteTermsSw
 	};
 }
 

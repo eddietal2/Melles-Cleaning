@@ -93,8 +93,10 @@
 		{:else}
 			<div class="grid min-h-0 flex-1 lg:grid-cols-2">
 				<div class="flex min-h-0 flex-col">
-					<div class="min-h-0 flex-1 overflow-y-auto p-5">
-						{@render children?.()}
+					<div class="min-h-0 flex-1 overflow-y-auto">
+						<div class="p-5">
+							{@render children?.()}
+						</div>
 					</div>
 					{#if footer}
 						<div class="shrink-0 border-t border-border p-5">
@@ -111,8 +113,10 @@
 		{/if}
 	{:else}
 		<div class="flex min-h-0 flex-1 flex-col">
-			<div class="min-h-0 flex-1 overflow-y-auto p-5">
-				{@render children?.()}
+			<div class="min-h-0 flex-1 overflow-y-auto">
+				<div class="p-5">
+					{@render children?.()}
+				</div>
 			</div>
 			{#if footer}
 				<div class="shrink-0 border-t border-border p-5">

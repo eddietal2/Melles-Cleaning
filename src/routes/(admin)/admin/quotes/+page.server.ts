@@ -1,14 +1,16 @@
-import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { fieldErrors, formDataToObject } from '$lib/schemas/form';
-import { quoteSchema, readLineItems } from '$lib/schemas/quote';
 import { recordAudit } from '$lib/server/audit';
-import { createQuote, deleteQuote, listQuotes } from '$lib/server/crm/quotes';
+import { getSiteSettings } from '$lib/server/content/site';
+import { deleteQuote, listQuotes } from '$lib/server/crm/quotes';
 import { db } from '$lib/server/db';
 
-export const load: PageServerLoad = () => {
-	// Streamed so the page frame renders immediately.
+export const load: PageServerLoad = async () => {
+	const settings = await getSiteSettings();
+
+	// Streamed so the page frame renders immediately. The defaults for the Terms
+	// & Conditions editor are loaded up front so the modal is prefilled.
 	return {
+		defaultTerms: { en: settings.quoteTermsEn, sw: settings.quoteTermsSw },
 		streamed: Promise.all([
 			listQuotes(),
 			db.client.findMany({
@@ -20,24 +22,31 @@ export const load: PageServerLoad = () => {
 };
 
 export const actions: Actions = {
-	create: async ({ request, locals }) => {
+	/** Saves the bilingual default terms used as the starting text for new quotes. */
+	terms: async ({ request, locals }) => {
 		const data = await request.formData();
-		const parsed = quoteSchema.safeParse(formDataToObject(data));
+		const termsEn = String(data.get('termsEn') ?? '').slice(0, 2000);
+		const termsSw = String(data.get('termsSw') ?? '').slice(0, 2000);
 
-		if (!parsed.success) {
-			return fail(400, { errors: fieldErrors(parsed.error) });
-		}
-
-		const quote = await createQuote(parsed.data, readLineItems(data));
+		await Promise.all([
+			db.siteSetting.upsert({
+				where: { key: 'quote_terms_en' },
+				update: { value: termsEn },
+				create: { key: 'quote_terms_en', value: termsEn, group: 'quotes' }
+			}),
+			db.siteSetting.upsert({
+				where: { key: 'quote_terms_sw' },
+				update: { value: termsSw },
+				create: { key: 'quote_terms_sw', value: termsSw, group: 'quotes' }
+			})
+		]);
 		await recordAudit({
 			userId: locals.user?.id,
-			action: 'create',
-			entityType: 'Quote',
-			entityId: quote.id,
-			diff: { quoteNumber: quote.quoteNumber }
+			action: 'update',
+			entityType: 'QuoteTerms'
 		});
 
-		throw redirect(303, `/admin/quotes/${quote.id}`);
+		return { success: true };
 	},
 
 	delete: async ({ request, locals }) => {

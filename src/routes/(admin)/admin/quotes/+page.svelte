@@ -1,75 +1,19 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { goto } from '$app/navigation';
 	import type { PageProps } from './$types';
-	import QuoteItemsEditor from '$lib/components/quotes/quote-items-editor.svelte';
-	import QuotePreview from '$lib/components/quotes/quote-preview.svelte';
 	import ConfirmDialog from '$lib/components/ui/confirm-dialog.svelte';
 	import Modal from '$lib/components/ui/modal.svelte';
-	import Spinner from '$lib/components/ui/spinner.svelte';
 	import TableSkeleton from '$lib/components/ui/table-skeleton.svelte';
-	import {
-		DEFAULT_QUOTE_TERMS,
-		type QuoteDocumentLang,
-		type QuoteItemRow,
-		type QuoteTerms
-	} from '$lib/schemas/quote';
+	import type { QuoteDocumentLang, QuoteTerms } from '$lib/schemas/quote';
 	import { formatTzs } from '$lib/utils/currency';
 	import { formatDate } from '$lib/utils/dates';
 	import { toast } from '$lib/utils/toast';
 
-	let { data, form }: PageProps = $props();
+	let { data }: PageProps = $props();
 
-	const errors = $derived((form as { errors?: Record<string, string> } | null)?.errors ?? {});
-
-	/** The new-quote modal is opened from the header action. */
-	let showForm = $state(false);
-
-	/** Whether the New quote modal shows the document preview full-width. */
-	let previewOnly = $state(false);
-
-	/** Zoom of the modal's document preview; snapped to 100% while expanded. */
-	let previewZoom = $state(0.6);
-
-	/** The zoom to restore when leaving full-preview mode. */
-	let zoomBeforeFull = 0.6;
-
-	/** Toggle full-preview mode, snapping the preview to 100% while expanded. */
-	function toggleFullPreview() {
-		if (previewOnly) {
-			previewOnly = false;
-			previewZoom = zoomBeforeFull;
-		} else {
-			zoomBeforeFull = previewZoom;
-			previewOnly = true;
-			previewZoom = 1;
-		}
-	}
-
-	/** The client chosen in the form, mirrored into the live document preview. */
-	let selectedClientId = $state('');
-
-	/** Whether the Terms & Conditions editor modal is open. */
-	let showTerms = $state(false);
-
-	/** True while the new quote is being submitted. */
-	let savingQuote = $state(false);
-
-	/** The quote awaiting delete confirmation, or null when the dialog is closed. */
-	let pendingDelete = $state<{ id: string; number: string } | null>(null);
-
-	/** Submitted programmatically once the owner confirms the deletion. */
-	let deleteForm = $state<HTMLFormElement | null>(null);
-
-	/** True while the quote deletion request is in flight. */
-	let deletingQuote = $state(false);
-
-	/**
-	 * Terms shown in the document footer, authored per language and edited via the
-	 * Terms & Conditions modal. A copy of the defaults is used so live edits don't
-	 * mutate the shared constant.
-	 */
-	let terms = $state<QuoteTerms>({ ...DEFAULT_QUOTE_TERMS });
+	/** Default quote terms, edited here and reused as the starting text for a new quote. */
+	// svelte-ignore state_referenced_locally
+	let terms = $state<QuoteTerms>({ ...data.defaultTerms });
 
 	/** Which language's terms the modal is currently editing. */
 	let termsLang = $state<QuoteDocumentLang>('en');
@@ -83,18 +27,20 @@
 	/** Maximum length of the free-text terms shown on the document. */
 	const TERMS_MAX = 1000;
 
-	/** The line items listed in the "Items" accordion of the new-quote form. */
-	let items = $state<QuoteItemRow[]>([
-		{
-			id: 0,
-			title: '',
-			cleaningType: '',
-			description: '',
-			quantity: 1,
-			unitPriceTzs: 0,
-			open: true
-		}
-	]);
+	/** Whether the Terms & Conditions editor is open. */
+	let showTerms = $state(false);
+
+	/** True while the terms are being saved. */
+	let savingTerms = $state(false);
+
+	/** The quote awaiting delete confirmation, or null when the dialog is closed. */
+	let pendingDelete = $state<{ id: string; number: string } | null>(null);
+
+	/** Submitted programmatically once the owner confirms the deletion. */
+	let deleteForm = $state<HTMLFormElement | null>(null);
+
+	/** True while the quote deletion request is in flight. */
+	let deletingQuote = $state(false);
 </script>
 
 <div class="space-y-8">
@@ -113,22 +59,32 @@
 			>
 				Terms & conditions
 			</button>
-			<button
-				type="button"
+			<a
+				href="/admin/quotes/new"
 				class="inline-flex shrink-0 items-center gap-2 rounded-brand bg-accent-600 px-4 py-2 text-sm font-semibold text-white shadow-card transition hover:bg-accent-700"
-				onclick={() => {
-					showForm = true;
-					previewOnly = false;
-					previewZoom = 0.6;
-				}}
 			>
 				Add quote
-			</button>
+			</a>
 		</div>
 	</div>
 
 	<Modal open={showTerms} title="Terms & Conditions" onclose={() => (showTerms = false)}>
-		<div class="space-y-2">
+		<form
+			method="POST"
+			action="?/terms"
+			class="space-y-3"
+			use:enhance={() => {
+				savingTerms = true;
+				return async ({ result, update }) => {
+					await update();
+					savingTerms = false;
+					if (result.type === 'success') {
+						showTerms = false;
+						toast.success('Default terms saved.');
+					}
+				};
+			}}
+		>
 			<div
 				class="flex w-fit items-center rounded-pill border border-border bg-surface-muted p-0.5 text-xs"
 				role="group"
@@ -149,7 +105,7 @@
 			</div>
 			<div class="flex items-center justify-between">
 				<label for="terms" class="block text-sm font-medium text-foreground">
-					Terms & conditions ({termsLang === 'en' ? 'English' : 'Kiswahili'})
+					Default terms ({termsLang === 'en' ? 'English' : 'Kiswahili'})
 				</label>
 				<span class="text-xs text-muted-foreground">{terms[termsLang].length}/{TERMS_MAX}</span>
 			</div>
@@ -161,126 +117,26 @@
 				placeholder="All rates quoted are valid for 15 days."
 				class="block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
 			></textarea>
+			<input type="hidden" name="termsEn" value={terms.en} />
+			<input type="hidden" name="termsSw" value={terms.sw} />
 			<p class="text-xs text-muted-foreground">
-				Shown in the footer of the quote document. Each language keeps its own text.
+				Used as the starting terms on every new quote. Each language keeps its own text.
 			</p>
-		</div>
-		{#snippet footer()}
 			<div class="flex justify-end">
 				<button
-					type="button"
-					class="rounded-brand bg-accent-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-700"
-					onclick={() => (showTerms = false)}
+					type="submit"
+					disabled={savingTerms}
+					class="rounded-brand bg-accent-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-700 disabled:cursor-not-allowed disabled:opacity-70"
 				>
-					Done
+					Save terms
 				</button>
 			</div>
-		{/snippet}
+		</form>
 	</Modal>
 
 	{#await data.streamed}
 		<TableSkeleton rows={6} columns={5} />
 	{:then payload}
-		<Modal
-			open={showForm}
-			title="New quote"
-			size="xl"
-			tall
-			{previewOnly}
-			onclose={() => (showForm = false)}
-		>
-			{#snippet headerActions()}
-				<button
-					type="button"
-					class="rounded-brand border border-border px-3 py-1.5 text-xs font-medium text-foreground transition hover:bg-surface-muted"
-					aria-pressed={previewOnly}
-					onclick={toggleFullPreview}
-				>
-					{previewOnly ? 'Exit full preview' : 'Full preview'}
-				</button>
-			{/snippet}
-			{#snippet preview()}
-				{@const selectedClient = payload.clients.find((client) => client.id === selectedClientId)}
-				<QuotePreview
-					clientName={selectedClient?.displayName ?? ''}
-					{items}
-					{terms}
-					bind:zoom={previewZoom}
-				/>
-			{/snippet}
-			{#snippet footer()}
-				<div class="flex items-center justify-end gap-3">
-					<button
-						type="button"
-						class="rounded-brand border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-surface-muted"
-						onclick={() => (showForm = false)}
-					>
-						Cancel
-					</button>
-					<button
-						type="submit"
-						form="quote-form"
-						disabled={savingQuote}
-						class="inline-flex items-center gap-2 rounded-brand bg-accent-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-700 disabled:cursor-not-allowed disabled:opacity-70"
-					>
-						{#if savingQuote}<Spinner class="h-4 w-4" />{/if}
-						Create quote
-					</button>
-				</div>
-			{/snippet}
-			<form
-				id="quote-form"
-				method="POST"
-				action="?/create"
-				class="space-y-4"
-				use:enhance={() => {
-					savingQuote = true;
-					return async ({ result, update }) => {
-						if (result.type === 'redirect') {
-							// Close the modal and confirm in the same beat as the redirect.
-							showForm = false;
-							toast.success('Quote created.');
-							await goto(result.location);
-							return;
-						}
-						await update();
-						savingQuote = false;
-					};
-				}}
-			>
-				<div>
-					<label for="clientId" class="block text-sm font-medium text-foreground">Client</label>
-					<select
-						id="clientId"
-						name="clientId"
-						required
-						bind:value={selectedClientId}
-						class="mt-1 block w-full rounded-brand border-border shadow-sm focus:border-brand-600 focus:ring-brand-600"
-					>
-						<option value="">Select a client</option>
-						{#each payload.clients as client (client.id)}
-							<option value={client.id}>{client.displayName}</option>
-						{/each}
-					</select>
-					{#if errors.clientId}<p class="mt-1 text-xs text-danger">{errors.clientId}</p>{/if}
-				</div>
-
-				<QuoteItemsEditor bind:items sticky />
-
-				<button
-					type="button"
-					class="flex w-full items-center justify-between gap-3 rounded-brand border border-border px-3 py-2 text-left transition hover:border-brand-500"
-					onclick={() => (showTerms = true)}
-				>
-					<span>
-						<span class="block text-sm font-medium text-foreground">Terms & conditions</span>
-						<span class="block text-xs text-muted-foreground">Shown in the document footer.</span>
-					</span>
-					<span class="text-xs font-medium text-brand-700">Edit</span>
-				</button>
-			</form>
-		</Modal>
-
 		<div class="overflow-hidden rounded-brand border border-border bg-background shadow-card">
 			<table class="min-w-full divide-y divide-border text-sm">
 				<thead

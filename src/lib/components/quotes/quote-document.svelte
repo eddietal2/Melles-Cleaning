@@ -198,7 +198,7 @@
 		</div>
 	</div>
 
-	<table class="mt-5 w-full border-collapse text-sm">
+	<table class="mt-5 w-full border-collapse text-sm" data-splittable>
 		<thead>
 			<tr class="text-left text-[0.65rem] tracking-wider text-slate-500 uppercase">
 				<th class="pb-2 font-semibold">{t.itemDescription}</th>
